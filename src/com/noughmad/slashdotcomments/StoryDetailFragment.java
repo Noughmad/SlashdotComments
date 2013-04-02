@@ -73,7 +73,7 @@ public class StoryDetailFragment extends ListFragment {
 			
 			Comment comment = mComments.get(position);
 			TextView title = (TextView)view.findViewById(R.id.comment_title);
-			title.setText(Html.fromHtml(comment.title));
+			title.setText(Html.fromHtml(comment.title) + " " + Html.fromHtml(comment.score));
 			
 			TextView content = (TextView)view.findViewById(R.id.comment_text);
 			content.setText(Html.fromHtml(comment.content));
