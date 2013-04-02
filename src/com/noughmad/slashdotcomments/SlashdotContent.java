@@ -113,7 +113,7 @@ public class SlashdotContent {
 		c.id = Long.parseLong(comment.id().substring(8));
 				
 		c.title = tree.select("a#comment_link_" + c.id).first().html();
-		if (c.title.trim() == "Re:" && parent != null) {
+		if (c.title.trim().equals("Re:") && parent != null) {
 			if (parent.title.startsWith("Re:")) {
 				c.title = parent.title;
 			} else {
