@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 
 import com.noughmad.slashdotcomments.SlashdotContent.Story;
+import com.tapfortap.Interstitial;
+import com.tapfortap.TapForTap;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -35,6 +37,8 @@ public class StoryListActivity extends Activity implements
 	private boolean mRefreshing;
 	private MenuItem mRefreshItem;
 	private ShareActionProvider mShareProvider;
+	
+	private static double INTERSTITIAL_PROBABILITY = 1.0 / 30.0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,9 @@ public class StoryListActivity extends Activity implements
 		}
 		
 		SlashdotContent.loadFromCache(this);
+		
+		TapForTap.initialize(this, "664a57b6f74bac48b3700d7cd1310139");
+		Interstitial.prepare(this);
 
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
@@ -89,6 +96,10 @@ public class StoryListActivity extends Activity implements
 			Intent detailIntent = new Intent(this, StoryDetailActivity.class);
 			detailIntent.putExtra(StoryDetailFragment.ARG_ITEM_ID, id);
 			startActivity(detailIntent);
+		}
+		
+		if (Math.random() < INTERSTITIAL_PROBABILITY) {
+			Interstitial.show(this);
 		}
 	}
 
