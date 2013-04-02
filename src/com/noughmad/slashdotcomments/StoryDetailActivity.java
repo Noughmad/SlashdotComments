@@ -2,8 +2,14 @@ package com.noughmad.slashdotcomments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ShareActionProvider;
+
+import com.noughmad.slashdotcomments.SlashdotContent.Story;
 
 /**
  * An activity representing a single Story detail screen. This activity is only
@@ -14,6 +20,9 @@ import android.view.MenuItem;
  * a {@link StoryDetailFragment}.
  */
 public class StoryDetailActivity extends Activity {
+	
+	private ShareActionProvider mShareProvider;
+	private Story mStory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +46,8 @@ public class StoryDetailActivity extends Activity {
 			// using a fragment transaction.
 			Bundle arguments = new Bundle();
 			long storyId = getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0);
-			SlashdotContent.Story story = SlashdotContent.findStoryById(storyId);
-			if (story != null) {
-				setTitle(story.title);
-			}
+			mStory = SlashdotContent.findStoryById(storyId);
+
 			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, storyId);
 			StoryDetailFragment fragment = new StoryDetailFragment();
 			fragment.setArguments(arguments);
@@ -66,6 +73,22 @@ public class StoryDetailActivity extends Activity {
             finish();
 			return true;
 		}
-		return super.onOptionsItemSelected(item);
+		return false;
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (mStory != null) {
+			getMenuInflater().inflate(R.menu.story_detail_menu, menu);
+			mShareProvider = (ShareActionProvider) menu.findItem(R.id.share).getActionProvider();
+	
+			Intent i = new Intent(Intent.ACTION_SEND);
+			i.setType("text/plain");
+			i.putExtra(Intent.EXTRA_SUBJECT, mStory.title);
+			i.putExtra(Intent.EXTRA_TEXT, mStory.url);
+			mShareProvider.setShareIntent(i);
+		}
+		
+		return true;
 	}
 }

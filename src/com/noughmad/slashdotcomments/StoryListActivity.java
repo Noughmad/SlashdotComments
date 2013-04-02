@@ -3,6 +3,9 @@ package com.noughmad.slashdotcomments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -27,6 +30,8 @@ public class StoryListActivity extends Activity implements
 	 * device.
 	 */
 	private boolean mTwoPane;
+	private boolean mRefreshing;
+	private MenuItem mRefreshItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,4 +86,46 @@ public class StoryListActivity extends Activity implements
 	public boolean isTwoPane() {
 		return mTwoPane;
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.story_list_menu, menu);
+		mRefreshItem = menu.findItem(R.id.refresh_stories);
+		
+		if (mTwoPane) {
+			getMenuInflater().inflate(R.menu.story_detail_menu, menu);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.refresh_stories:
+			StoryListFragment fragment = (StoryListFragment) getFragmentManager().findFragmentById(R.id.story_list);
+			fragment.refreshStories();
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		Log.i("StoryListActivity", "Updating menu: " + mRefreshing);
+		if (mRefreshing) {
+			menu.getItem(0).setActionView(R.layout.actionbar_indeterminate_progress);
+		} else {
+			menu.getItem(0).setActionView(null);
+		}
+		return true;
+	}
+
+	@Override
+	public void onRefreshStateChanged(boolean refreshing) {
+		Log.i("StoryListActivity", "Refreshing changed: " + refreshing);
+		mRefreshing = refreshing;
+		invalidateOptionsMenu();
+	}
+	
+	
 }

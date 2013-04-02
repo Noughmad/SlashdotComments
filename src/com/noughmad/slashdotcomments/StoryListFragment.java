@@ -58,6 +58,8 @@ public class StoryListFragment extends ListFragment {
 		public void onItemSelected(long l);
 		
 		public boolean isTwoPane();
+		
+		public void onRefreshStateChanged(boolean refreshing);
 	}
 
 	/**
@@ -70,6 +72,8 @@ public class StoryListFragment extends ListFragment {
 		}
 		public boolean isTwoPane() {
 			return false;
+		}
+		public void onRefreshStateChanged(boolean refreshing) {
 		}
 	};
 	
@@ -139,6 +143,7 @@ public class StoryListFragment extends ListFragment {
 		@Override
 		protected void onPostExecute(List<Story> result) {
 			setListAdapter(new StoriesAdapter(result));
+			mCallbacks.onRefreshStateChanged(false);
 		}
 	};
 
@@ -239,5 +244,6 @@ public class StoryListFragment extends ListFragment {
 	
 	public void refreshStories() {
 		(new GetStoriesTask()).execute("http://slashdot.org");
+		mCallbacks.onRefreshStateChanged(true);
 	}
 }
