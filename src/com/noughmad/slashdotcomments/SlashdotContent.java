@@ -101,7 +101,7 @@ public class SlashdotContent {
 	
 	public static Map<Long, List<Comment>> comments = new HashMap<Long, List<Comment>>();
 	
-	private static void parseComment(List<Comment> list, Element tree, int level) {
+	private static void parseComment(List<Comment> list, Element tree, int level, Comment parent) {
 		if (tree.hasClass("hidden")) {
 			return;
 		}
@@ -113,6 +113,13 @@ public class SlashdotContent {
 		c.id = Long.parseLong(comment.id().substring(8));
 				
 		c.title = tree.select("a#comment_link_" + c.id).first().html();
+		if (c.title.trim() == "Re:" && parent != null) {
+			if (parent.title.startsWith("Re:")) {
+				c.title = parent.title;
+			} else {
+				c.title = "Re:" + parent.title; 
+			}
+		}
 		
 		Elements authorLinks = comment.select("span.by a");
 		if (!authorLinks.isEmpty()) {
@@ -120,13 +127,13 @@ public class SlashdotContent {
 		} else {
 			c.author = comment.select("span.by").first().html();
 		}
-		c.content = comment.select("div.commentBody").first().html();
+		c.content = comment.select("div#comment_body_" + c.id).first().html();
 		c.score = comment.select("span.score").first().html();
 		
 		list.add(c);
 		
 		for (Element subTree : tree.select("ul#commtree_" + c.id + " > li.comment")) {
-			parseComment(list, subTree, level + 1);
+			parseComment(list, subTree, level + 1, c);
 		}
 	}
 	
@@ -139,7 +146,7 @@ public class SlashdotContent {
 		List<Comment> list = new ArrayList<Comment>();
 		
 		for (Element tree : doc.select("ul#commentlisting > li.comment")) {
-			parseComment(list, tree, 0);			
+			parseComment(list, tree, 0, null);			
 		}
 		
 		SlashdotContent.comments.put(storyId, list);

@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ShareActionProvider;
+
+import com.noughmad.slashdotcomments.SlashdotContent.Story;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -29,22 +32,16 @@ public class StoryListActivity extends Activity implements
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
 	 * device.
 	 */
-	private boolean mTwoPane;
 	private boolean mRefreshing;
 	private MenuItem mRefreshItem;
+	private ShareActionProvider mShareProvider;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_story_list);
 
-		if (findViewById(R.id.story_detail_container) != null) {
-			// The detail container view will be present only in the
-			// large-screen layouts (res/values-large and
-			// res/values-sw600dp). If this view is present, then the
-			// activity should be in two-pane mode.
-			mTwoPane = true;
-
+		if (isTwoPane()) {
 			// In two-pane mode, list items should be given the
 			// 'activated' state when touched.
 			((StoryListFragment) getFragmentManager().findFragmentById(
@@ -62,7 +59,8 @@ public class StoryListActivity extends Activity implements
 	 */
 	@Override
 	public void onItemSelected(long id) {
-		if (mTwoPane) {
+		Log.w("StoryListActivity", "Item selected: " + id);
+		if (isTwoPane()) {
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
@@ -72,7 +70,19 @@ public class StoryListActivity extends Activity implements
 			fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
 					.replace(R.id.story_detail_container, fragment).commit();
+			
 
+			Story story = SlashdotContent.findStoryById(id);
+			if (story != null) {
+				Intent i = new Intent(Intent.ACTION_SEND);
+				i.setType("text/plain");
+				i.putExtra(Intent.EXTRA_SUBJECT, story.title);
+				i.putExtra(Intent.EXTRA_TEXT, story.url);
+				mShareProvider.setShareIntent(i);
+			} else {
+				Log.wtf("StoryListActivity", "Item selected with no story");
+				Log.wtf("StoryListActivity", SlashdotContent.stories.toString());
+			}
 		} else {
 			// In single-pane mode, simply start the detail activity
 			// for the selected item ID.
@@ -84,7 +94,7 @@ public class StoryListActivity extends Activity implements
 
 	@Override
 	public boolean isTwoPane() {
-		return mTwoPane;
+		return this.getResources().getBoolean(R.bool.is_two_pane);
 	}
 
 	@Override
@@ -92,8 +102,9 @@ public class StoryListActivity extends Activity implements
 		getMenuInflater().inflate(R.menu.story_list_menu, menu);
 		mRefreshItem = menu.findItem(R.id.refresh_stories);
 		
-		if (mTwoPane) {
+		if (isTwoPane()) {
 			getMenuInflater().inflate(R.menu.story_detail_menu, menu);
+			mShareProvider = (ShareActionProvider) menu.findItem(R.id.share).getActionProvider();
 		}
 		return true;
 	}

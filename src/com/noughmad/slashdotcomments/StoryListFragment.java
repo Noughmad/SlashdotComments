@@ -187,7 +187,6 @@ public class StoryListFragment extends ListFragment {
 		
 		if (SlashdotContent.areStoriesLoaded()) {
 			setListAdapter(new StoriesAdapter(SlashdotContent.stories));
-		} else {
 		}
 		
 		refreshStories();

@@ -31,6 +31,7 @@
         android:id="@+id/story_detail_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="8" />
+        android:layout_weight="8"
+        android:padding="8dp" />
 
 </LinearLayout>

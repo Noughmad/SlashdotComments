@@ -77,9 +77,10 @@ public class StoryDetailFragment extends ListFragment {
 			
 			TextView content = (TextView)view.findViewById(R.id.comment_text);
 			content.setText(Html.fromHtml(comment.content));
+			Log.d("CommentsAdapter", "Content: " + comment.content);
 			
 			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * comment.level, getResources().getDisplayMetrics());
-			view.setPadding(px, 0, 0, 0);
+			view.setPadding(px, 0, 0, 4);
 			
 			return view;
 		}
@@ -129,6 +130,8 @@ public class StoryDetailFragment extends ListFragment {
 
 			
 			mStory = SlashdotContent.findStoryById(getArguments().getLong(ARG_ITEM_ID));
+		} else {
+			Log.wtf("StoryDetailFragment", "No story found for " + getArguments().getLong(ARG_ITEM_ID));
 		}
 	}
 
@@ -142,6 +145,9 @@ public class StoryDetailFragment extends ListFragment {
 			if (this.getListAdapter() != null) {
 				this.setListAdapter(null);
 			}
+			
+			getListView().setDivider(null);
+			getListView().setDividerHeight(0);
 			
 			View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
 			

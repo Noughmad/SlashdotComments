@@ -14,17 +14,16 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
         android:textColor="@android:color/primary_text_dark"
-        android:background="@drawable/green_gradient"
-        android:text="Story title" />
+        android:background="@drawable/green_gradient" />
 
     <TextView
         android:id="@+id/story_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/story_title"
-        android:padding="4dp"
-        android:textIsSelectable="true"
-        android:text="Story Summary" />
+        android:padding="16dp"
+        android:linksClickable="true"
+        android:textIsSelectable="true" />
 
     <ToggleButton
         android:id="@+id/toggle"
