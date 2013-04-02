@@ -14,7 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.noughmad.slashdotcomments.SlashdotContent.Comment;
 import com.noughmad.slashdotcomments.SlashdotContent.Story;
@@ -65,17 +68,17 @@ public class StoryDetailFragment extends ListFragment {
 			View view = convertView;
 			if (view == null) {
 				LayoutInflater inflater = getActivity().getLayoutInflater();
-				view = inflater.inflate(android.R.layout.two_line_list_item, parent, false);
+				view = inflater.inflate(R.layout.item_comment, parent, false);
 			}
 			
 			Comment comment = mComments.get(position);
-			TextView title = (TextView)view.findViewById(android.R.id.text1);
+			TextView title = (TextView)view.findViewById(R.id.comment_title);
 			title.setText(Html.fromHtml(comment.title));
 			
-			TextView content = (TextView)view.findViewById(android.R.id.text2);
+			TextView content = (TextView)view.findViewById(R.id.comment_text);
 			content.setText(Html.fromHtml(comment.content));
 			
-			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16 * comment.level, getResources().getDisplayMetrics());
+			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * comment.level, getResources().getDisplayMetrics());
 			view.setPadding(px, 0, 0, 0);
 			
 			return view;
@@ -140,14 +143,24 @@ public class StoryDetailFragment extends ListFragment {
 				this.setListAdapter(null);
 			}
 			
-			TextView title = new TextView(getActivity());
-			title.setTextAppearance(getActivity(), android.R.style.TextAppearance_Large);
-			title.setText(Html.fromHtml(mStory.title));
-			getListView().addHeaderView(title);
+			View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
 			
-			TextView summary = new TextView(getActivity());
+			TextView title = (TextView) header.findViewById(R.id.story_title);
+			title.setText(Html.fromHtml(mStory.title));
+			
+			final TextView summary = (TextView) header.findViewById(R.id.story_summary);
 			summary.setText(Html.fromHtml(mStory.summary));
-			getListView().addHeaderView(summary);
+			getListView().addHeaderView(header);
+			
+			ToggleButton button = (ToggleButton) header.findViewById(R.id.toggle);
+			button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					summary.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+				}});
+			button.setChecked(true);
 			
 			if (SlashdotContent.areCommentsLoaded(mStory.id)) {
 				setListAdapter(new CommentsAdapter(SlashdotContent.getComments(mStory.id)));

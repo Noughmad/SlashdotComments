@@ -1,0 +1,40 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/story_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/toggle"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"       
+        android:padding="4dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
+        android:textColor="@android:color/primary_text_dark"
+        android:background="@drawable/green_gradient"
+        android:text="Story title" />
+
+    <TextView
+        android:id="@+id/story_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/story_title"
+        android:padding="4dp"
+        android:textIsSelectable="true"
+        android:text="Story Summary" />
+
+    <ToggleButton
+        android:id="@+id/toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/story_title"
+        android:layout_alignTop="@+id/story_title"
+        android:textOff="+"
+        android:textOn="-" />
+
+</RelativeLayout>

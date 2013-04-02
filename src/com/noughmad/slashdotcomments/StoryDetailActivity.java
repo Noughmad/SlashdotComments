@@ -36,8 +36,12 @@ public class StoryDetailActivity extends Activity {
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, getIntent()
-					.getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0));
+			long storyId = getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0);
+			SlashdotContent.Story story = SlashdotContent.findStoryById(storyId);
+			if (story != null) {
+				setTitle(story.title);
+			}
+			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, storyId);
 			StoryDetailFragment fragment = new StoryDetailFragment();
 			fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
