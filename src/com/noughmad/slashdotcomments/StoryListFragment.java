@@ -126,24 +126,27 @@ public class StoryListFragment extends ListFragment {
 		@Override
 		protected List<Story> doInBackground(String... params) {
 			try {
-				SlashdotContent.refreshStories();
+				return SlashdotContent.refreshStories();
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.cancel(true);
-				return new ArrayList<Story>();
 			}
-			try {
-				SlashdotContent.saveToCache(getActivity());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return SlashdotContent.stories;
+			return null;
 		}
 
 		@Override
 		protected void onPostExecute(List<Story> result) {
-			setListAdapter(new StoriesAdapter(result));
-			mCallbacks.onRefreshStateChanged(false);
+			if (result != null) {
+				SlashdotContent.stories = result;
+				setListAdapter(new StoriesAdapter(result));
+				mCallbacks.onRefreshStateChanged(false);
+				
+				try {
+					SlashdotContent.saveToCache(getActivity());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	};
 

@@ -48,13 +48,14 @@ public class SlashdotContent {
 	
 	public static List<Story> stories = new ArrayList<Story>();
 	
-	public static void refreshStories() throws IOException {
+	public static List<Story> refreshStories() throws IOException {
 		URL url;
 		
 		stories = new ArrayList<Story>();
 		
 		url = new URL("http://slashdot.org");
 		Document doc = Jsoup.parse(url, 30000);
+		List<Story> list = new ArrayList<Story>();
 
 		Elements articles = doc.select("article[data-fhid]");
 		for (Element article : articles) {
@@ -82,8 +83,10 @@ public class SlashdotContent {
 			
 			story.commentCount = Integer.parseInt(article.select("span.commentcnt-" + story.id).first().html());
 			
-			stories.add(story);
+			list.add(story);
 		}
+		
+		return list;
 	}
 	
 	public static Story findStoryById(long id) {
@@ -137,19 +140,23 @@ public class SlashdotContent {
 		}
 	}
 	
-	public static void refreshComments(long storyId) throws IOException {
+	public static List<Comment> refreshComments(long storyId) throws IOException {
 		Story story = findStoryById(storyId);
+		
+		List<Comment> list = new ArrayList<Comment>();
+		if (story == null) {
+			return list;
+		}
 		
 		URL url = new URL(story.url);
 		Document doc = Jsoup.parse(url, 30 * 1000);
 		
-		List<Comment> list = new ArrayList<Comment>();
 		
 		for (Element tree : doc.select("ul#commentlisting > li.comment")) {
 			parseComment(list, tree, 0, null);			
 		}
 		
-		SlashdotContent.comments.put(storyId, list);
+		return list;
 	}
 	
 	public static List<Comment> getComments(long storyId) {

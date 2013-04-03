@@ -8,6 +8,7 @@ import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -77,6 +78,7 @@ public class StoryDetailFragment extends ListFragment {
 			
 			TextView content = (TextView)view.findViewById(R.id.comment_text);
 			content.setText(Html.fromHtml(comment.content));
+			content.setMovementMethod(LinkMovementMethod.getInstance());
 			Log.d("CommentsAdapter", "Content: " + comment.content);
 			
 			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * comment.level, getResources().getDisplayMetrics());
@@ -88,26 +90,32 @@ public class StoryDetailFragment extends ListFragment {
 	};
 
 	private class GetCommentsTask extends AsyncTask<Long, Void, List<Comment> > {
+		
+		private long id;
 
 		@Override
 		protected List<Comment> doInBackground(Long... params) {
+			id = params[0];
 			try {
-				SlashdotContent.refreshComments(params[0]);
+				return SlashdotContent.refreshComments(id);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			try {
-				SlashdotContent.saveToCache(getActivity());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return SlashdotContent.getComments(params[0]);
+			return null;
 		}
 
 		@Override
 		protected void onPostExecute(List<Comment> result) {
-			Log.i("GetCommentsTask", String.format("Found %d comments", result.size()) );
-			setListAdapter(new CommentsAdapter(result));
+			if (result != null) {
+				SlashdotContent.comments.put(id, result);
+				setListAdapter(new CommentsAdapter(result));
+				
+				try {
+					SlashdotContent.saveToCache(getActivity());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	};
 
@@ -156,6 +164,7 @@ public class StoryDetailFragment extends ListFragment {
 			
 			final TextView summary = (TextView) header.findViewById(R.id.story_summary);
 			summary.setText(Html.fromHtml(mStory.summary));
+			summary.setMovementMethod(LinkMovementMethod.getInstance());
 			getListView().addHeaderView(header);
 			
 			ToggleButton button = (ToggleButton) header.findViewById(R.id.toggle);

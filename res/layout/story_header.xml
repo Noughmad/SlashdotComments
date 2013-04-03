@@ -22,8 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/story_title"
         android:padding="16dp"
-        android:linksClickable="true"
-        android:textIsSelectable="true" />
+        android:linksClickable="true" />
 
     <ToggleButton
         android:id="@+id/toggle"
