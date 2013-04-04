@@ -1,10 +1,8 @@
 package com.noughmad.slashdotcomments;
 
 import android.app.Activity;
-import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;

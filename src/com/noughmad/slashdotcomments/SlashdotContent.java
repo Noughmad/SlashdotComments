@@ -1,19 +1,9 @@
 package com.noughmad.slashdotcomments;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -67,7 +57,7 @@ public class SlashdotContent {
 			return;
 		}
 		
-		Uri storiesUrl = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
+		Uri storiesUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
 		
 		Elements articles = doc.select("article[data-fhid]");
 		for (Element article : articles) {
@@ -98,7 +88,7 @@ public class SlashdotContent {
 			
 			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
-			Uri uri = ContentUris.withAppendedId(storiesUrl, id);
+			Uri uri = ContentUris.withAppendedId(storiesUri, id);
 			Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
 			if (existing.moveToFirst()) {
 				context.getContentResolver().update(uri, values, null, null);
@@ -108,72 +98,88 @@ public class SlashdotContent {
 		}
 	}
 	
-	public static Map<Long, List<Comment>> comments = new HashMap<Long, List<Comment>>();
-	
-	private static void parseComment(List<Comment> list, Element tree, int level, Comment parent) {
+	private static void parseComment(Context context, Uri baseUri, Element tree, int level, String parentTitle) {
 		if (tree.hasClass("hidden")) {
 			return;
 		}
 		
 		Element comment = tree.select("div.cw").first();
 		
-		Comment c = new Comment();
-		c.level = level;
-		c.id = Long.parseLong(comment.id().substring(8));
+		ContentValues values = new ContentValues();
+		values.put(SlashdotProvider.COMMENT_LEVEL, level);
+		
+		long id = Long.parseLong(comment.id().substring(8));
+		values.put(SlashdotProvider.ID, id);
 				
-		c.title = tree.select("a#comment_link_" + c.id).first().html();
-		if (c.title.trim().equals("Re:") && parent != null) {
-			if (parent.title.startsWith("Re:")) {
-				c.title = parent.title;
+		String title = tree.select("a#comment_link_" + id).first().html();
+		if (title.trim().equals("Re:") && parentTitle != null) {
+			if (parentTitle.startsWith("Re:")) {
+				title = parentTitle;
 			} else {
-				c.title = "Re:" + parent.title; 
+				title = "Re:" + parentTitle; 
+			}
+		}
+		values.put(SlashdotProvider.COMMENT_TITLE, title);
+
+		String author = null;
+		Elements authorLinks = comment.select("span.by a");
+		if (!authorLinks.isEmpty()) {
+			author = authorLinks.first().html();
+		} else {
+			author = comment.select("span.by").first().html();
+		}
+		
+		values.put(SlashdotProvider.COMMENT_AUTHOR, author);
+		
+		values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
+		values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
+
+		Uri uri = ContentUris.withAppendedId(baseUri, id);
+		Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
+		if (existing.moveToFirst()) {
+			context.getContentResolver().update(uri, values, null, null);
+		} else {
+			context.getContentResolver().insert(uri, values);
+		}
+		
+		for (Element subTree : tree.select("ul#commtree_" + id + " > li.comment")) {
+			parseComment(context, baseUri, subTree, level + 1, title);
+		}
+	}
+	
+	public static void refreshComments(Context context, long storyId, String source) {
+		Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), storyId);
+
+		if (source == null) {
+			Cursor story = context.getContentResolver().query(storyUri, new String[] {SlashdotProvider.STORY_URL}, null, null, null);
+			
+			if (story.moveToFirst()) {
+				source = story.getString(0);
+			} else {
+				return;
 			}
 		}
 		
-		Elements authorLinks = comment.select("span.by a");
-		if (!authorLinks.isEmpty()) {
-			c.author = authorLinks.first().html();
-		} else {
-			c.author = comment.select("span.by").first().html();
-		}
-		c.content = comment.select("div#comment_body_" + c.id).first().html();
-		c.score = comment.select("span.score").first().html();
-		
-		list.add(c);
-		
-		for (Element subTree : tree.select("ul#commtree_" + c.id + " > li.comment")) {
-			parseComment(list, subTree, level + 1, c);
-		}
-	}
-	
-	public static List<Comment> refreshComments(long storyId) throws IOException {
-		Story story = findStoryById(storyId);
-		
-		List<Comment> list = new ArrayList<Comment>();
-		if (story == null) {
-			return list;
+		URL url;
+		try {
+			url = new URL(source);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return;
 		}
 		
-		URL url = new URL(story.url);
-		Document doc = Jsoup.parse(url, 30 * 1000);
+		Document doc;
+		try {
+			doc = Jsoup.parse(url, 30 * 1000);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		
+		Uri baseUri = Uri.withAppendedPath(storyUri, SlashdotProvider.COMMENTS_TABLE_NAME);
 		
 		for (Element tree : doc.select("ul#commentlisting > li.comment")) {
-			parseComment(list, tree, 0, null);			
+			parseComment(context, baseUri, tree, 0, null);			
 		}
-		
-		return list;
-	}
-	
-	public static List<Comment> getComments(long storyId) {
-		if (areCommentsLoaded(storyId)) {
-			return comments.get(storyId);
-		} else {
-			return null;
-		}
-	}
-	
-	public static boolean areCommentsLoaded(long storyId) {
-		return comments != null && comments.containsKey(storyId);
-	}
+	};
 }

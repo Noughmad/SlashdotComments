@@ -1,8 +1,5 @@
 package com.noughmad.slashdotcomments;
 
-import java.io.IOException;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -19,10 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-
-import com.noughmad.slashdotcomments.SlashdotContent.Story;
 
 /**
  * A list fragment representing a list of Stories. This fragment also supports

@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 
-import com.noughmad.slashdotcomments.SlashdotContent.Story;
 import com.tapfortap.Interstitial;
 import com.tapfortap.TapForTap;
 

@@ -1,7 +1,5 @@
 package com.noughmad.slashdotcomments;
 
-import java.util.List;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -46,6 +44,7 @@ public class SlashdotProvider extends ContentProvider {
 	static final String COMMENT_SCORE = "score";
 	static final String COMMENT_LEVEL = "level";
 	static final String COMMENT_CONTENT = "content";
+	static final String COMMENT_AUTHOR = "author";
 	
 	private Helper mHelper;
 	
@@ -146,7 +145,7 @@ public class SlashdotProvider extends ContentProvider {
 		private final static int DB_VERSION = 1;
 
 		public Helper(Context context) {
-			super(context, DB_NAME, null, 1);
+			super(context, DB_NAME, null, DB_VERSION);
 		}
 		
 		private static final String CREATE_STORIES = "CREATE TABLE " + STORIES_TABLE_NAME + " ("
@@ -161,7 +160,8 @@ public class SlashdotProvider extends ContentProvider {
 				+ COMMENT_STORY + " INTEGER, "
 				+ COMMENT_TITLE + " TEXT, "
 				+ COMMENT_SCORE + " TEXT, "
-				+ COMMENT_CONTENT + " TEXT, " +
+				+ COMMENT_CONTENT + " TEXT, "
+				+ COMMENT_AUTHOR + " TEXT, " +
 				"FOREIGN KEY(" + COMMENT_STORY + " REFERENCES " + STORIES_TABLE_NAME + "(" + ID + "));";
 
 		@Override
