@@ -20,7 +20,7 @@ public class SlashdotProvider extends ContentProvider {
 	private static final int CODE_STORY_COMMENTS = 3;
 	private static final int CODE_STORY_COMMENT_ID = 4;
 	
-	static UriMatcher sUriMatcher;
+	static UriMatcher sUriMatcher = new UriMatcher(0);
 	
 	static {
 		sUriMatcher.addURI(AUTHORITY, "stories", CODE_STORIES);

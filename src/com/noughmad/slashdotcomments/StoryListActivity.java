@@ -37,7 +37,6 @@ public class StoryListActivity extends Activity implements
 	 * device.
 	 */
 	private boolean mRefreshing;
-	private MenuItem mRefreshItem;
 	private ShareActionProvider mShareProvider;
 	
 	private static double INTERSTITIAL_PROBABILITY = 1.0 / 30.0;
@@ -111,7 +110,6 @@ public class StoryListActivity extends Activity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.story_list_menu, menu);
-		mRefreshItem = menu.findItem(R.id.refresh_stories);
 		
 		if (isTwoPane()) {
 			getMenuInflater().inflate(R.menu.story_detail_menu, menu);

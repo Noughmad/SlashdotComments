@@ -138,8 +138,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
-		setEmptyText("Loading stories...");
 		setListAdapter(new StoriesAdapter(getActivity(), null));
+		refreshStories();
+
+		getLoaderManager().initLoader(0, null, this);
+		setListShown(false);
 	}
 
 	@Override
@@ -165,8 +168,6 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 		}
 
 		mCallbacks = (Callbacks) activity;
-
-		refreshStories();
 	}
 
 	@Override
@@ -232,8 +233,10 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		((CursorAdapter)getListAdapter()).swapCursor(cursor);
-		setListShown(true);
+		if (cursor != null && cursor.getCount() > 0) {
+			((CursorAdapter)getListAdapter()).swapCursor(cursor);
+			setListShown(true);
+		}
 	}
 
 	@Override
