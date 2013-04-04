@@ -134,7 +134,11 @@ public class SlashdotProvider extends ContentProvider {
 			selectionArgs = new String[] {uri.getPathSegments().get(1)};
 			cursor = mHelper.getReadableDatabase().query(COMMENTS_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 			cursor.setNotificationUri(getContext().getContentResolver(), uri);
-			return cursor;			
+			return cursor;
+			
+		case CODE_STORY_COMMENT_ID:
+			// TODO: Handle this case to prevent NullPointerExceptions
+			break;
 		}
 		return null;
 	}

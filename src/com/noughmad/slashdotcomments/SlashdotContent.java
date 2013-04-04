@@ -136,6 +136,7 @@ public class SlashdotContent {
 		values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
 
 		Uri uri = ContentUris.withAppendedId(baseUri, id);
+		Log.w("Will throw", "Uri: " + uri);
 		Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
 		if (existing.moveToFirst()) {
 			context.getContentResolver().update(uri, values, null, null);
