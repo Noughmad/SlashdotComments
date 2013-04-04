@@ -91,6 +91,8 @@ public class StoryDetailActivity extends Activity {
 			mShareProvider.setShareIntent(i);
 		}
 		
+		cursor.close();
+		
 		return true;
 	}
 }

@@ -84,6 +84,7 @@ public class SlashdotProvider extends ContentProvider {
 		if (tableName != null) {
 			long id = mHelper.getWritableDatabase().insert(tableName, null, values);
 			getContext().getContentResolver().notifyChange(uri, null);
+			getContext().getContentResolver().notifyChange(Uri.withAppendedPath(BASE_URI, tableName), null);
 			return ContentUris.withAppendedId(uri, id);
 		} else {
 			return null;
@@ -126,18 +127,24 @@ public class SlashdotProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
+		int updated = 0;
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORY_DETAIL:
 			selection = ID + " = ?";
 			selectionArgs = new String[] {uri.getPathSegments().get(1)};
-			return mHelper.getReadableDatabase().update(STORIES_TABLE_NAME, values, selection, selectionArgs);
+			updated = mHelper.getReadableDatabase().update(STORIES_TABLE_NAME, values, selection, selectionArgs);
+			getContext().getContentResolver().notifyChange(Uri.withAppendedPath(BASE_URI, STORIES_TABLE_NAME), null);
 			
 		case CODE_STORY_COMMENT_ID:
 			selection = COMMENT_STORY + " = ? AND " + ID + " = ?";
 			selectionArgs = new String[] {uri.getPathSegments().get(1), uri.getPathSegments().get(3)};
-			return mHelper.getReadableDatabase().update(COMMENTS_TABLE_NAME, values, selection, selectionArgs);
+			updated = mHelper.getReadableDatabase().update(COMMENTS_TABLE_NAME, values, selection, selectionArgs);
+			getContext().getContentResolver().notifyChange(Uri.withAppendedPath(BASE_URI, COMMENTS_TABLE_NAME), null);
 		}
-		return 0;
+		
+		getContext().getContentResolver().notifyChange(uri, null);
+
+		return updated;
 	}
 	
 	private class Helper extends SQLiteOpenHelper {

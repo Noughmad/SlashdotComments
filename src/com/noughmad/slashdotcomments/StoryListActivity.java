@@ -91,6 +91,8 @@ public class StoryListActivity extends Activity implements
 			} else {
 				Log.wtf("StoryListActivity", "Item selected with no story");
 			}
+			
+			cursor.close();
 		} else {
 			// In single-pane mode, simply start the detail activity
 			// for the selected item ID.

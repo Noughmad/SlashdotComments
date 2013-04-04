@@ -157,6 +157,8 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 			
 			(new GetCommentsTask()).execute(mStoryId);
 		}
+		
+		cursor.close();
 	}
 
 

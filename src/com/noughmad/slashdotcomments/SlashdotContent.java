@@ -95,6 +95,7 @@ public class SlashdotContent {
 			} else {
 				context.getContentResolver().insert(uri, values);
 			}
+			existing.close();
 		}
 	}
 	
@@ -141,6 +142,7 @@ public class SlashdotContent {
 		} else {
 			context.getContentResolver().insert(uri, values);
 		}
+		existing.close();
 		
 		for (Element subTree : tree.select("ul#commtree_" + id + " > li.comment")) {
 			parseComment(context, baseUri, subTree, level + 1, title);
@@ -155,7 +157,9 @@ public class SlashdotContent {
 			
 			if (story.moveToFirst()) {
 				source = story.getString(0);
+				story.close();
 			} else {
+				story.close();
 				return;
 			}
 		}

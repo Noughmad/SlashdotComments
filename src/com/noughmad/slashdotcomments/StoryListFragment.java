@@ -233,8 +233,8 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		if (cursor != null && cursor.getCount() > 0) {
-			((CursorAdapter)getListAdapter()).swapCursor(cursor);
+		((CursorAdapter)getListAdapter()).swapCursor(cursor);
+		if (cursor.getCount() > 0) {
 			setListShown(true);
 		}
 	}
