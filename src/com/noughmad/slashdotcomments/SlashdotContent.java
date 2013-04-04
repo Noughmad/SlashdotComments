@@ -100,19 +100,6 @@ public class SlashdotContent {
 		}
 	}
 	
-	public static Story findStoryById(long id) {
-		for (Story story : stories) {
-			if (story.id == id) {
-				return story;
-			}
-		}
-		return null;
-	}
-	
-	public static boolean areStoriesLoaded() {
-		return stories != null && !stories.isEmpty();
-	}
-	
 	public static Map<Long, List<Comment>> comments = new HashMap<Long, List<Comment>>();
 	
 	private static void parseComment(List<Comment> list, Element tree, int level, Comment parent) {
@@ -180,51 +167,5 @@ public class SlashdotContent {
 	
 	public static boolean areCommentsLoaded(long storyId) {
 		return comments != null && comments.containsKey(storyId);
-	}
-	
-	public static void saveToCache(Context context) throws IOException {
-		
-		if (context == null) {
-			return;
-		}
-		
-		FileOutputStream stream = context.openFileOutput("stories", Context.MODE_PRIVATE);
-		ObjectOutputStream objectStream = new ObjectOutputStream(stream);
-
-		objectStream.writeObject(stories);
-		objectStream.writeObject(comments);
-		
-		objectStream.close();
-		stream.close();
-	}
-	
-	public static void loadFromCache(Context context) {
-		if (areStoriesLoaded()) {
-			return;
-		}
-		
-		try {
-			FileInputStream stream = context.openFileInput("stories");
-			ObjectInputStream objectStream = new ObjectInputStream(stream);
-			
-			stories = (List<Story>) objectStream.readObject();
-			comments = (Map<Long, List<Comment>>) objectStream.readObject();
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		} catch (StreamCorruptedException e) {
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return;
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-			return;
-		}
 	}
 }

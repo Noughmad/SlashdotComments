@@ -1,15 +1,16 @@
 package com.noughmad.slashdotcomments;
 
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
-
-import com.noughmad.slashdotcomments.SlashdotContent.Story;
 
 /**
  * An activity representing a single Story detail screen. This activity is only
@@ -22,7 +23,7 @@ import com.noughmad.slashdotcomments.SlashdotContent.Story;
 public class StoryDetailActivity extends Activity {
 	
 	private ShareActionProvider mShareProvider;
-	private Story mStory;
+	private long mStoryId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +46,9 @@ public class StoryDetailActivity extends Activity {
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 			Bundle arguments = new Bundle();
-			long storyId = getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0);
-			mStory = SlashdotContent.findStoryById(storyId);
+			mStoryId = getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0);
+			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, mStoryId);
 
-			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, storyId);
 			StoryDetailFragment fragment = new StoryDetailFragment();
 			fragment.setArguments(arguments);
 			getFragmentManager().beginTransaction()
@@ -78,14 +78,18 @@ public class StoryDetailActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if (mStory != null) {
+		
+		Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
+		Cursor cursor = getContentResolver().query(uri, new String[] {SlashdotProvider.STORY_TITLE, SlashdotProvider.STORY_URL}, null, null, null);
+		
+		if (cursor.moveToFirst()) {
 			getMenuInflater().inflate(R.menu.story_detail_menu, menu);
 			mShareProvider = (ShareActionProvider) menu.findItem(R.id.share).getActionProvider();
 	
 			Intent i = new Intent(Intent.ACTION_SEND);
 			i.setType("text/plain");
-			i.putExtra(Intent.EXTRA_SUBJECT, mStory.title);
-			i.putExtra(Intent.EXTRA_TEXT, mStory.url);
+			i.putExtra(Intent.EXTRA_SUBJECT, cursor.getString(0));
+			i.putExtra(Intent.EXTRA_TEXT, cursor.getString(1));
 			mShareProvider.setShareIntent(i);
 		}
 		
