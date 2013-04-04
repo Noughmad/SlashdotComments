@@ -1,6 +1,7 @@
 package com.noughmad.slashdotcomments;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,8 +13,8 @@ import android.net.Uri;
 
 public class SlashdotProvider extends ContentProvider {
 	
-	public static final String AUTHORITY = "content://com.noughmad.slashdotcomments.provider";
-	public static final Uri BASE_URI = Uri.parse(AUTHORITY);
+	public static final String AUTHORITY = "com.noughmad.slashdotcomments.provider";
+	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
 	private static final int CODE_STORIES = 1;
 	private static final int CODE_STORY_DETAIL = 2;
@@ -149,20 +150,20 @@ public class SlashdotProvider extends ContentProvider {
 		}
 		
 		private static final String CREATE_STORIES = "CREATE TABLE " + STORIES_TABLE_NAME + " ("
-				+ ID + "INTEGER UNIQUE, "
+				+ ID + " INTEGER UNIQUE, "
 				+ STORY_TITLE + " TEXT, "
 				+ STORY_COMMENT_COUNT + " INTEGER, "
 				+ STORY_URL + " TEXT, "
 				+ STORY_SUMMARY + " TEXT);";
 				
 		private static final String CREATE_COMMENTS = "CREATE TABLE " + COMMENTS_TABLE_NAME + " ("
-				+ ID + "INTEGER UNIQUE, "
+				+ ID + " INTEGER UNIQUE, "
 				+ COMMENT_STORY + " INTEGER, "
 				+ COMMENT_TITLE + " TEXT, "
 				+ COMMENT_SCORE + " TEXT, "
 				+ COMMENT_CONTENT + " TEXT, "
 				+ COMMENT_AUTHOR + " TEXT, " +
-				"FOREIGN KEY(" + COMMENT_STORY + " REFERENCES " + STORIES_TABLE_NAME + "(" + ID + "));";
+				"FOREIGN KEY(" + COMMENT_STORY + ") REFERENCES " + STORIES_TABLE_NAME + "(" + ID + "));";
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {

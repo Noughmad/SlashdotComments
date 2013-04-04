@@ -34,7 +34,10 @@
                 android:value=".StoryListActivity" />
         </activity>
         <activity android:name="com.tapfortap.TapForTapActivity"/>
-        <provider android:authorities="com.noughmad.slashdotcomments.provider" android:name="com.noughmad.slashdotcomments.SlashdotProvider"></provider>
+        <provider
+            android:name="com.noughmad.slashdotcomments.SlashdotProvider"
+            android:authorities="com.noughmad.slashdotcomments.provider" >
+        </provider>
     </application>
 
 </manifest>

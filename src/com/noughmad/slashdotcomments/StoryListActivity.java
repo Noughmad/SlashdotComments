@@ -55,6 +55,8 @@ public class StoryListActivity extends Activity implements
 		
 		TapForTap.initialize(this, "664a57b6f74bac48b3700d7cd1310139");
 		Interstitial.prepare(this);
+		
+		Log.w("BASE_URI", SlashdotProvider.BASE_URI.toString());
 
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
