@@ -41,6 +41,14 @@ public class SlashdotContent {
 		int level;
 	}
 	
+	public static void refreshStories(Context context, int page) {
+		if (page == 0) {
+			refreshStories(context, "http://slashdot.org");
+		} else {
+			refreshStories(context, "http://slashdot.org/?page=" + page);
+		}
+	}
+	
 	public static void refreshStories(Context context, String source) {
 		URL url;
 		try {

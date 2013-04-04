@@ -1,7 +1,10 @@
 package com.noughmad.slashdotcomments;
 
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -52,8 +55,6 @@ public class StoryListActivity extends Activity implements
 					R.id.story_list)).setActivateOnItemClick(true);
 		}
 		
-		SlashdotContent.loadFromCache(this);
-		
 		TapForTap.initialize(this, "664a57b6f74bac48b3700d7cd1310139");
 		Interstitial.prepare(this);
 
@@ -78,17 +79,17 @@ public class StoryListActivity extends Activity implements
 			getFragmentManager().beginTransaction()
 					.replace(R.id.story_detail_container, fragment).commit();
 			
-
-			Story story = SlashdotContent.findStoryById(id);
-			if (story != null) {
+			Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), id);
+			Cursor cursor = getContentResolver().query(uri, new String[] {SlashdotProvider.STORY_TITLE, SlashdotProvider.STORY_URL}, null, null, null);
+			
+			if (cursor.moveToFirst()) {
 				Intent i = new Intent(Intent.ACTION_SEND);
 				i.setType("text/plain");
-				i.putExtra(Intent.EXTRA_SUBJECT, story.title);
-				i.putExtra(Intent.EXTRA_TEXT, story.url);
+				i.putExtra(Intent.EXTRA_SUBJECT, cursor.getString(0));
+				i.putExtra(Intent.EXTRA_TEXT, cursor.getString(1));
 				mShareProvider.setShareIntent(i);
 			} else {
 				Log.wtf("StoryListActivity", "Item selected with no story");
-				Log.wtf("StoryListActivity", SlashdotContent.stories.toString());
 			}
 		} else {
 			// In single-pane mode, simply start the detail activity
