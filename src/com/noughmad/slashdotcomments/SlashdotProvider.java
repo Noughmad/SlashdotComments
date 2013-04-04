@@ -31,18 +31,21 @@ public class SlashdotProvider extends ContentProvider {
 		sUriMatcher.addURI(AUTHORITY, "stories/#/comments/#", CODE_STORY_COMMENT_ID);
 	}
 
-	private static final String STORIES_TABLE_NAME = "stories";
-	private static final String COMMENTS_TABLE_NAME = "comments";
+	static final String STORIES_TABLE_NAME = "stories";
+	static final String COMMENTS_TABLE_NAME = "comments";
 
-	private static final String ID = "_id";
-	private static final String STORY_TITLE = "title";
-	private static final String STORY_SUMMARY = "summary";
+	static final String ID = "_id";
+	static final String STORY_TITLE = "title";
+	static final String STORY_SUMMARY = "summary";
+	static final String STORY_COMMENT_COUNT = "comment_count";
+	static final String STORY_URL = "url";
+
 	
-	private static final String COMMENT_STORY = "story";
-	private static final String COMMENT_TITLE = "title";
-	private static final String COMMENT_SCORE = "score";
-	private static final String COMMENT_LEVEL = "level";
-	private static final String COMMENT_CONTENT = "content";
+	static final String COMMENT_STORY = "story";
+	static final String COMMENT_TITLE = "title";
+	static final String COMMENT_SCORE = "score";
+	static final String COMMENT_LEVEL = "level";
+	static final String COMMENT_CONTENT = "content";
 	
 	private Helper mHelper;
 	
@@ -149,6 +152,8 @@ public class SlashdotProvider extends ContentProvider {
 		private static final String CREATE_STORIES = "CREATE TABLE " + STORIES_TABLE_NAME + " ("
 				+ ID + "INTEGER UNIQUE, "
 				+ STORY_TITLE + " TEXT, "
+				+ STORY_COMMENT_COUNT + " INTEGER, "
+				+ STORY_URL + " TEXT, "
 				+ STORY_SUMMARY + " TEXT);";
 				
 		private static final String CREATE_COMMENTS = "CREATE TABLE " + COMMENTS_TABLE_NAME + " ("

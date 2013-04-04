@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,20 +20,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 public class SlashdotContent {
-	
-	public static class Story implements Serializable {
-		private static final long serialVersionUID = 1L;
-		
-		public String title;
-		public String summary;
-		public long id;
-		public String url;
-		public int commentCount;
-	}
 	
 	public static class Comment implements Serializable {
 		private static final long serialVersionUID = 1L;
@@ -46,17 +41,26 @@ public class SlashdotContent {
 		int level;
 	}
 	
-	public static List<Story> stories = new ArrayList<Story>();
-	
-	public static List<Story> refreshStories() throws IOException {
+	public static void refreshStories(Context context, String source) {
 		URL url;
+		try {
+			url = new URL(source);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return;
+		}
 		
-		stories = new ArrayList<Story>();
 		
-		url = new URL("http://slashdot.org");
-		Document doc = Jsoup.parse(url, 30000);
-		List<Story> list = new ArrayList<Story>();
-
+		Document doc;
+		try {
+			doc = Jsoup.parse(url, 30000);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		Uri storiesUrl = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
+		
 		Elements articles = doc.select("article[data-fhid]");
 		for (Element article : articles) {
 			Elements titles = article.select("header h2.story");
@@ -64,29 +68,36 @@ public class SlashdotContent {
 				continue;
 			}
 			
-			SlashdotContent.Story story = new SlashdotContent.Story();
-			story.id = Long.parseLong(article.attr("data-fhid"));
+			long id = Long.parseLong(article.attr("data-fhid"));
+			
+			ContentValues values = new ContentValues();
 			
 			Element title = titles.first();
-			Element link = title.select("a[href]").first(); 
-			story.title = link.html();
+			Element link = title.select("a[href]").first();
 
-			story.url = link.attr("href");
-			if (!story.url.startsWith("http")) {
-				story.url = "http:" + story.url;
+			values.put(SlashdotProvider.STORY_TITLE, link.html());
+
+			String storyUrl = link.attr("href");
+			if (!storyUrl.startsWith("http")) {
+				storyUrl = "http:" + storyUrl;
 			}
+			values.put(SlashdotProvider.STORY_URL, storyUrl);
 			
-			story.summary = article.select("div#text-" + story.id).first().html();
+			values.put(SlashdotProvider.STORY_SUMMARY, article.select("div#text-" + id).first().html());
 
-			Log.i("GetStoriesTask", "Parsed story " + story.id);
-			Log.i("GetStoriesTask", story.title);
+			Log.i("GetStoriesTask", "Parsed story " + id);
+			Log.v("GetStoriesTask", values.getAsString(SlashdotProvider.STORY_TITLE));
 			
-			story.commentCount = Integer.parseInt(article.select("span.commentcnt-" + story.id).first().html());
+			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
-			list.add(story);
+			Uri uri = ContentUris.withAppendedId(storiesUrl, id);
+			Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
+			if (existing.moveToFirst()) {
+				context.getContentResolver().update(uri, values, null, null);
+			} else {
+				context.getContentResolver().insert(uri, values);
+			}
 		}
-		
-		return list;
 	}
 	
 	public static Story findStoryById(long id) {

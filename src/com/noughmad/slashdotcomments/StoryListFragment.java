@@ -1,19 +1,25 @@
 package com.noughmad.slashdotcomments;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.noughmad.slashdotcomments.SlashdotContent.Story;
@@ -27,7 +33,7 @@ import com.noughmad.slashdotcomments.SlashdotContent.Story;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class StoryListFragment extends ListFragment {
+public class StoryListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -77,76 +83,46 @@ public class StoryListFragment extends ListFragment {
 		}
 	};
 	
-	private class StoriesAdapter extends BaseAdapter {
+	private static final String[] STORIES_COLUMNS = new String[] {
+		SlashdotProvider.ID,
+		SlashdotProvider.STORY_TITLE,
+		SlashdotProvider.STORY_COMMENT_COUNT
+	}; 
+	
+	private class StoriesAdapter extends CursorAdapter {
 		
-		private List<Story> mStories;
-		
-		StoriesAdapter(List<Story> stories) {
-			super();
-			mStories = stories;
+		public StoriesAdapter(Context context, Cursor c) {
+			super(context, c, false);
 		}
 
 		@Override
-		public int getCount() {
-			return mStories.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return mStories.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return mStories.get(position).id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View view = convertView;
-			if (view == null) {
-				LayoutInflater inflater = getActivity().getLayoutInflater();
-				view = inflater.inflate(R.layout.item_story, parent, false);
-			}
-			
-			Story story = mStories.get(position);
+		public void bindView(View view, Context context, Cursor cursor) {
 			TextView title = (TextView)view.findViewById(R.id.story_title);
-			title.setText(Html.fromHtml(story.title));
+			title.setText(Html.fromHtml(cursor.getString(0)));
 			
 			TextView comments = (TextView)view.findViewById(R.id.story_comments);
-			comments.setText(String.format("Comments: %d", story.commentCount));
-			
-			return view;
+			comments.setText(String.format("Comments: %d", cursor.getInt(1)));
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			return inflater.inflate(R.layout.item_story, parent, false);
 		}
 		
 	};
 		
-	private class GetStoriesTask extends AsyncTask<String, Void, List<SlashdotContent.Story> > {
+	private class GetStoriesTask extends AsyncTask<String, Void, Void> {
 
 		@Override
-		protected List<Story> doInBackground(String... params) {
-			try {
-				return SlashdotContent.refreshStories();
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.cancel(true);
-			}
+		protected Void doInBackground(String... params) {
+			SlashdotContent.refreshStories(getActivity(), params[0]);
 			return null;
 		}
 
 		@Override
-		protected void onPostExecute(List<Story> result) {
-			if (result != null) {
-				SlashdotContent.stories = result;
-				setListAdapter(new StoriesAdapter(result));
-				mCallbacks.onRefreshStateChanged(false);
-				
-				try {
-					SlashdotContent.saveToCache(getActivity());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+		protected void onPostExecute(Void v) {
+			mCallbacks.onRefreshStateChanged(false);
 		}
 	};
 
@@ -160,6 +136,16 @@ public class StoryListFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
+	
+	
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		setEmptyText("Loading stories...");
+		setListAdapter(new StoriesAdapter(getActivity(), null));
 	}
 
 	@Override
@@ -185,13 +171,7 @@ public class StoryListFragment extends ListFragment {
 		}
 
 		mCallbacks = (Callbacks) activity;
-		SlashdotContent.loadFromCache(activity);
 
-		
-		if (SlashdotContent.areStoriesLoaded()) {
-			setListAdapter(new StoriesAdapter(SlashdotContent.stories));
-		}
-		
 		refreshStories();
 	}
 
@@ -247,5 +227,22 @@ public class StoryListFragment extends ListFragment {
 	public void refreshStories() {
 		(new GetStoriesTask()).execute("http://slashdot.org");
 		mCallbacks.onRefreshStateChanged(true);
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
+		
+		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, null);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		((CursorAdapter)getListAdapter()).swapCursor(cursor);
+		setListShown(true);
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
 	}
 }
