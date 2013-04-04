@@ -10,8 +10,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 public class SlashdotProvider extends ContentProvider {
+	
+	private static final String TAG = "SlashdotProvider";
 	
 	public static final String AUTHORITY = "com.noughmad.slashdotcomments.provider";
 	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
@@ -70,15 +73,24 @@ public class SlashdotProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
+		
+		Log.i(TAG, "Insert: " + uri);
+		
 		String tableName = null;
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORIES:
 			tableName = STORIES_TABLE_NAME;
 			break;
 			
+		case CODE_STORY_DETAIL:
+			tableName = STORIES_TABLE_NAME;
+			values.put(ID, ContentUris.parseId(uri));
+			break;
+			
 		case CODE_STORY_COMMENTS:
 			tableName = COMMENTS_TABLE_NAME;
 			values.put(COMMENT_STORY, Long.parseLong(uri.getPathSegments().get(1)));
+			break;
 		}
 				
 		if (tableName != null) {
@@ -100,6 +112,9 @@ public class SlashdotProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
+		
+		Log.i(TAG, "Query: " + uri);
+		
 		Cursor cursor = null;
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORIES:
@@ -134,12 +149,14 @@ public class SlashdotProvider extends ContentProvider {
 			selectionArgs = new String[] {uri.getPathSegments().get(1)};
 			updated = mHelper.getReadableDatabase().update(STORIES_TABLE_NAME, values, selection, selectionArgs);
 			getContext().getContentResolver().notifyChange(Uri.withAppendedPath(BASE_URI, STORIES_TABLE_NAME), null);
+			break;
 			
 		case CODE_STORY_COMMENT_ID:
 			selection = COMMENT_STORY + " = ? AND " + ID + " = ?";
 			selectionArgs = new String[] {uri.getPathSegments().get(1), uri.getPathSegments().get(3)};
 			updated = mHelper.getReadableDatabase().update(COMMENTS_TABLE_NAME, values, selection, selectionArgs);
 			getContext().getContentResolver().notifyChange(Uri.withAppendedPath(BASE_URI, COMMENTS_TABLE_NAME), null);
+			break;
 		}
 		
 		getContext().getContentResolver().notifyChange(uri, null);

@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -233,6 +234,9 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		
+		Log.i("StoryListFragment", "Load finished: " + cursor.getCount());
+		
 		((CursorAdapter)getListAdapter()).swapCursor(cursor);
 		if (cursor.getCount() > 0) {
 			setListShown(true);
