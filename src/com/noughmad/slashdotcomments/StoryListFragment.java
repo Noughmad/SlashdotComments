@@ -93,10 +93,10 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView title = (TextView)view.findViewById(R.id.story_title);
-			title.setText(Html.fromHtml(cursor.getString(0)));
+			title.setText(Html.fromHtml(cursor.getString(1)));
 			
 			TextView comments = (TextView)view.findViewById(R.id.story_comments);
-			comments.setText(String.format("Comments: %d", cursor.getInt(1)));
+			comments.setText(String.format("Comments: %d", cursor.getInt(2)));
 		}
 
 		@Override
