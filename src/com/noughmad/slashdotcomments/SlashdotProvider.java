@@ -1,7 +1,8 @@
 package com.noughmad.slashdotcomments;
 
+import java.io.File;
+
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,7 +11,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.util.Log;
 
 public class SlashdotProvider extends ContentProvider {
 	
@@ -204,7 +204,11 @@ public class SlashdotProvider extends ContentProvider {
 			db.execSQL(CREATE_STORIES);
 			db.execSQL(CREATE_COMMENTS);
 			
-			// TODO: Read the cache from previous version, then delete it
+			// If an old cache file exists, delete it to free system resources
+			File cache = getContext().getFileStreamPath("stories");
+			if (cache.exists()) {
+				cache.delete();
+			}
 		}
 
 		@Override
