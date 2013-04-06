@@ -136,14 +136,15 @@ public class SlashdotContent {
 		values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
 
 		Uri uri = ContentUris.withAppendedId(baseUri, id);
-		Log.w("Will throw", "Uri: " + uri);
 		Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
-		if (existing.moveToFirst()) {
+		boolean exists = existing.getCount() > 0;
+		existing.close();
+
+		if (exists) {
 			context.getContentResolver().update(uri, values, null, null);
 		} else {
 			context.getContentResolver().insert(uri, values);
 		}
-		existing.close();
 		
 		for (Element subTree : tree.select("ul#commtree_" + id + " > li.comment")) {
 			parseComment(context, baseUri, subTree, level + 1, title);
@@ -151,6 +152,10 @@ public class SlashdotContent {
 	}
 	
 	public static void refreshComments(Context context, long storyId, String source) {
+		if (context == null) {
+			return;
+		}
+		
 		Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), storyId);
 
 		if (source == null) {

@@ -41,6 +41,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	private long mStoryId;
 	
 	private static String[] COMMENT_PROJECTION = new String[] {
+		SlashdotProvider.ID,
 		SlashdotProvider.COMMENT_TITLE,
 		SlashdotProvider.COMMENT_SCORE,
 		SlashdotProvider.COMMENT_CONTENT,
@@ -62,13 +63,13 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView title = (TextView)view.findViewById(R.id.comment_title);
-			title.setText(Html.fromHtml(cursor.getString(0)) + " " + Html.fromHtml(cursor.getString(1)));
+			title.setText(Html.fromHtml(cursor.getString(1)) + " " + Html.fromHtml(cursor.getString(2)));
 			
 			TextView content = (TextView)view.findViewById(R.id.comment_text);
-			content.setText(Html.fromHtml(cursor.getString(2)));
+			content.setText(Html.fromHtml(cursor.getString(3)));
 			content.setMovementMethod(LinkMovementMethod.getInstance());
 			
-			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * cursor.getInt(3), getResources().getDisplayMetrics());
+			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * cursor.getInt(4), getResources().getDisplayMetrics());
 			view.setPadding(px, 0, 0, 4);
 		}
 
@@ -121,29 +122,22 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		
+		getListView().setDivider(null);
+		getListView().setDividerHeight(0);
+		
 		Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
 		Cursor cursor = getActivity().getContentResolver().query(uri, STORY_PROJECTION, null, null, null);
 		
 		if (cursor.moveToFirst()) {
-			
-			this.setListAdapter(new CommentsAdapter(getActivity(), null));
-			
-			if (this.getListAdapter() != null) {
-				this.setListAdapter(null);
-			}
-			
-			getListView().setDivider(null);
-			getListView().setDividerHeight(0);
-			
+					
 			View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
 			
 			TextView title = (TextView) header.findViewById(R.id.story_title);
 			title.setText(Html.fromHtml(cursor.getString(0)));
 			
 			final TextView summary = (TextView) header.findViewById(R.id.story_summary);
-			summary.setText(Html.fromHtml(cursor.getString(0)));
+			summary.setText(Html.fromHtml(cursor.getString(1)));
 			summary.setMovementMethod(LinkMovementMethod.getInstance());
-			getListView().addHeaderView(header);
 			
 			ToggleButton button = (ToggleButton) header.findViewById(R.id.toggle);
 			button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -155,7 +149,12 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 				}});
 			button.setChecked(true);
 			
+			getListView().addHeaderView(header);
+			setListAdapter(new CommentsAdapter(getActivity(), null));
+			getLoaderManager().initLoader(0, null, this);
 			(new GetCommentsTask()).execute(mStoryId);
+		} else {
+			Log.wtf("StoryDetailFragment", "Story with id " + mStoryId + " not found");
 		}
 		
 		cursor.close();
@@ -165,7 +164,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Uri commentsUri = Uri.withAppendedPath(ContentUris.withAppendedId(
-				Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), id), SlashdotProvider.COMMENTS_TABLE_NAME);
+				Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId), SlashdotProvider.COMMENTS_TABLE_NAME);
 
 		return new CursorLoader(getActivity(), commentsUri, COMMENT_PROJECTION, null, null, null);
 	}

@@ -67,15 +67,14 @@ public class SlashdotProvider extends ContentProvider {
 			return "vnd.android.cursor.item/vnd.com.noughmad.slashdotcomments.provider.stories";
 		case CODE_STORY_COMMENTS:
 			return "vnd.android.cursor.dir/vnd.com.noughmad.slashdotcomments.provider.comments";
+		case CODE_STORY_COMMENT_ID:
+			return "vnd.android.cursor.item/vnd.com.noughmad.slashdotcomments.provider.comments";
 		}
 		return null;
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
-		
-		Log.i(TAG, "Insert: " + uri);
-		
+	public Uri insert(Uri uri, ContentValues values) {		
 		String tableName = null;
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORIES:
@@ -90,6 +89,12 @@ public class SlashdotProvider extends ContentProvider {
 		case CODE_STORY_COMMENTS:
 			tableName = COMMENTS_TABLE_NAME;
 			values.put(COMMENT_STORY, Long.parseLong(uri.getPathSegments().get(1)));
+			break;
+			
+		case CODE_STORY_COMMENT_ID:
+			tableName = COMMENTS_TABLE_NAME;
+			values.put(COMMENT_STORY, Long.parseLong(uri.getPathSegments().get(1)));
+			values.put(ID, Long.parseLong(uri.getPathSegments().get(3)));
 			break;
 		}
 				
@@ -111,10 +116,7 @@ public class SlashdotProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
-		
-		Log.i(TAG, "Query: " + uri);
-		
+			String[] selectionArgs, String sortOrder) {		
 		Cursor cursor = null;
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORIES:
@@ -137,8 +139,11 @@ public class SlashdotProvider extends ContentProvider {
 			return cursor;
 			
 		case CODE_STORY_COMMENT_ID:
-			// TODO: Handle this case to prevent NullPointerExceptions
-			break;
+			selection = COMMENT_STORY + " = ? AND " + ID + " = ?";
+			selectionArgs = new String[] {uri.getPathSegments().get(1),  uri.getPathSegments().get(3)};
+			cursor = mHelper.getReadableDatabase().query(COMMENTS_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+			cursor.setNotificationUri(getContext().getContentResolver(), uri);
+			return cursor;
 		}
 		return null;
 	}
@@ -190,7 +195,8 @@ public class SlashdotProvider extends ContentProvider {
 				+ COMMENT_TITLE + " TEXT, "
 				+ COMMENT_SCORE + " TEXT, "
 				+ COMMENT_CONTENT + " TEXT, "
-				+ COMMENT_AUTHOR + " TEXT, " +
+				+ COMMENT_AUTHOR + " TEXT, "
+				+ COMMENT_LEVEL + " INTEGER, " +
 				"FOREIGN KEY(" + COMMENT_STORY + ") REFERENCES " + STORIES_TABLE_NAME + "(" + ID + "));";
 
 		@Override
