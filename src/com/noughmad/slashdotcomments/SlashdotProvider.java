@@ -203,6 +203,8 @@ public class SlashdotProvider extends ContentProvider {
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL(CREATE_STORIES);
 			db.execSQL(CREATE_COMMENTS);
+			
+			// TODO: Read the cache from previous version, then delete it
 		}
 
 		@Override
