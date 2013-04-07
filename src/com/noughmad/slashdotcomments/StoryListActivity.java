@@ -135,7 +135,6 @@ public class StoryListActivity extends Activity implements
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		Log.i("StoryListActivity", "Updating menu: " + mRefreshing);
 		if (mRefreshing) {
 			menu.getItem(0).setActionView(R.layout.actionbar_indeterminate_progress);
 		} else {
@@ -146,9 +145,10 @@ public class StoryListActivity extends Activity implements
 
 	@Override
 	public void onRefreshStateChanged(boolean refreshing) {
-		Log.i("StoryListActivity", "Refreshing changed: " + refreshing);
-		mRefreshing = refreshing;
-		invalidateOptionsMenu();
+		if (refreshing != mRefreshing) {
+			mRefreshing = refreshing;
+			invalidateOptionsMenu();
+		}
 	}
 	
 	

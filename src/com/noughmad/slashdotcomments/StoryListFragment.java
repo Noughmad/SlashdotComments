@@ -1,11 +1,14 @@
 package com.noughmad.slashdotcomments;
 
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,6 +51,8 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	 */
 	private int mActivatedPosition = ListView.INVALID_POSITION;
 
+	private int mUpdatesInProgress = 0;
+	
 	/**
 	 * A callback interface that all activities containing this fragment must
 	 * implement. This mechanism allows activities to be notified of item
@@ -107,17 +113,27 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 		
 	};
 		
-	private class GetStoriesTask extends AsyncTask<String, Void, Void> {
+	private class GetStoriesTask extends AsyncTask<Calendar, Void, Calendar> {
 
 		@Override
-		protected Void doInBackground(String... params) {
-			SlashdotContent.refreshStories(getActivity(), params[0]);
-			return null;
+		protected void onPreExecute() {
+			mUpdatesInProgress++;
+			mCallbacks.onRefreshStateChanged(true);
 		}
 
 		@Override
-		protected void onPostExecute(Void v) {
-			mCallbacks.onRefreshStateChanged(false);
+		protected Calendar doInBackground(Calendar... params) {
+			SlashdotContent.refreshStories(getActivity(), params[0]);
+			return params[0];
+		}
+
+		@Override
+		protected void onPostExecute(Calendar date) {
+			mUpdatesInProgress--;
+			mCallbacks.onRefreshStateChanged(mUpdatesInProgress > 0);
+
+			SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
+			prefs.edit().putLong("LastUpdate", date.getTimeInMillis()).apply();
 		}
 	};
 
@@ -144,6 +160,32 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 		getLoaderManager().initLoader(0, null, this);
 		setListShown(false);
+		
+		getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				
+				if ((mUpdatesInProgress == 0) && (firstVisibleItem + visibleItemCount >= totalItemCount - 3)) {
+					// The user scrolled to the bottom
+					
+					Calendar calendar = Calendar.getInstance();
+					SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
+					if (prefs.contains("LastUpdate")) {
+						calendar.setTimeInMillis(prefs.getLong("LastUpdate", 0));
+					}
+					
+					Log.w("OnScrollListener", "Updating: " + calendar);
+					calendar.add(Calendar.DAY_OF_MONTH, -1);
+					
+					(new GetStoriesTask()).execute(calendar);
+				}
+			}
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {				
+			}});
 	}
 
 	@Override
@@ -221,22 +263,18 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	}
 	
 	public void refreshStories() {
-		(new GetStoriesTask()).execute("http://slashdot.org");
-		mCallbacks.onRefreshStateChanged(true);
+		(new GetStoriesTask()).execute(Calendar.getInstance());
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
 		
-		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, null);
+		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, SlashdotProvider.ID + " DESC");
 	}
 
 	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		
-		Log.i("StoryListFragment", "Load finished: " + cursor.getCount());
-		
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {		
 		((CursorAdapter)getListAdapter()).swapCursor(cursor);
 		if (cursor.getCount() > 0) {
 			setListShown(true);

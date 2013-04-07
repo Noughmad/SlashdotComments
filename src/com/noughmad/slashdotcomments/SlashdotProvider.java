@@ -54,7 +54,14 @@ public class SlashdotProvider extends ContentProvider {
 	
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO: Will probably never need deleting
+		switch (sUriMatcher.match(uri)) {
+		case CODE_STORY_COMMENTS:
+			selection = COMMENT_STORY + " = ?";
+			selectionArgs = new String[] {uri.getPathSegments().get(1)};
+			int ret = mHelper.getWritableDatabase().delete(COMMENTS_TABLE_NAME, selection, selectionArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return ret;
+		}
 		return 0;
 	}
 

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,15 +34,21 @@ public class SlashdotContent {
 		int level;
 	}
 	
-	public static void refreshStories(Context context, int page) {
-		if (page == 0) {
-			refreshStories(context, "http://slashdot.org");
-		} else {
-			refreshStories(context, "http://slashdot.org/?page=" + page);
+	public static void refreshStories(Context context, Calendar date) {
+		if (date == null) {
+			date = Calendar.getInstance();
 		}
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+		format.setCalendar(date);
+		String source = "http://slashdot.org/?issue=" + format.format(date.getTime());
+
+		refreshStories(context, source);
 	}
 	
 	public static void refreshStories(Context context, String source) {
+		Log.i("RefreshStories", "Refreshing from " + source);
+		
 		URL url;
 		try {
 			url = new URL(source);
@@ -80,12 +89,7 @@ public class SlashdotContent {
 				storyUrl = "http:" + storyUrl;
 			}
 			values.put(SlashdotProvider.STORY_URL, storyUrl);
-			
 			values.put(SlashdotProvider.STORY_SUMMARY, article.select("div#text-" + id).first().html());
-
-			Log.i("GetStoriesTask", "Parsed story " + id);
-			Log.v("GetStoriesTask", values.getAsString(SlashdotProvider.STORY_TITLE));
-			
 			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
 			Uri uri = ContentUris.withAppendedId(storiesUri, id);
@@ -157,7 +161,7 @@ public class SlashdotContent {
 		}
 		
 		Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), storyId);
-
+		
 		if (source == null) {
 			Cursor story = context.getContentResolver().query(storyUri, new String[] {SlashdotProvider.STORY_URL}, null, null, null);
 			
@@ -187,6 +191,7 @@ public class SlashdotContent {
 		}
 		
 		Uri baseUri = Uri.withAppendedPath(storyUri, SlashdotProvider.COMMENTS_TABLE_NAME);
+		context.getContentResolver().delete(baseUri, null, null);
 		
 		for (Element tree : doc.select("ul#commentlisting > li.comment")) {
 			parseComment(context, baseUri, tree, 0, null);			
