@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textColor="@android:color/primary_text_dark"
-        android:background="@drawable/green_gradient"
+        android:background="@drawable/comment_title_background_gradient"
         android:padding="4dp" />
 
     <TextView

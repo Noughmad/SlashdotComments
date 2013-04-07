@@ -5,11 +5,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
@@ -25,8 +26,8 @@ import android.widget.ShareActionProvider;
 public class StoryDetailActivity extends FragmentActivity {
 	
 	private ShareActionProvider mShareProvider;
-	private long mStoryId;
 	private ViewPager mViewPager;
+	private StoriesPagerAdapter mAdapter;
 	
 	private class StoriesPagerAdapter extends FragmentStatePagerAdapter {
 		
@@ -35,7 +36,7 @@ public class StoryDetailActivity extends FragmentActivity {
 		public StoriesPagerAdapter(FragmentManager fm) {
 			super(fm);
 			Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
-			String[] projection = new String[] {SlashdotProvider.ID, SlashdotProvider.STORY_TITLE};
+			String[] projection = new String[] {SlashdotProvider.ID, SlashdotProvider.STORY_TITLE, SlashdotProvider.STORY_URL};
 			mCursor = getContentResolver().query(uri, projection, null, null, SlashdotProvider.ID + " DESC");
 		}
 
@@ -59,7 +60,7 @@ public class StoryDetailActivity extends FragmentActivity {
 		@Override
 		public CharSequence getPageTitle(int position) {
 			mCursor.moveToPosition(position);
-			return mCursor.getString(1);
+			return Html.fromHtml(mCursor.getString(1));
 		}
 
 		public int findItem(long id) {
@@ -71,6 +72,16 @@ public class StoryDetailActivity extends FragmentActivity {
 			}
 			return -1;
 		};
+		
+		public String getStoryUrl(int position) {
+			mCursor.moveToPosition(position);
+			return mCursor.getString(2);
+		}
+		
+		public long getStoryId(int position) {
+			mCursor.moveToPosition(position);
+			return mCursor.getLong(0);
+		}
 	};
 
 	@Override
@@ -82,8 +93,23 @@ public class StoryDetailActivity extends FragmentActivity {
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		mViewPager = (ViewPager) findViewById(R.id.pager);
-		StoriesPagerAdapter adapter = new StoriesPagerAdapter(getSupportFragmentManager());
-		mViewPager.setAdapter(adapter);
+		mAdapter = new StoriesPagerAdapter(getSupportFragmentManager());
+		mViewPager.setAdapter(mAdapter);
+		
+		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+			@Override
+			public void onPageScrollStateChanged(int state) {
+			}
+
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+			}
+
+			@Override
+			public void onPageSelected(int position) {
+				invalidateOptionsMenu();
+			}});
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
@@ -95,7 +121,7 @@ public class StoryDetailActivity extends FragmentActivity {
 		// http://developer.android.com/guide/components/fragments.html
 		//
 		if (savedInstanceState == null) {
-			int position = adapter.findItem(getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0));
+			int position = mAdapter.findItem(getIntent().getLongExtra(StoryDetailFragment.ARG_ITEM_ID, 0));
 			if (position > -1) {
 				mViewPager.setCurrentItem(position);
 			}
@@ -118,18 +144,25 @@ public class StoryDetailActivity extends FragmentActivity {
             startActivity(upIntent);
             finish();
 			return true;
+			
+		case R.id.open_in_browser:
+			Intent i = new Intent(Intent.ACTION_VIEW, 
+				       Uri.parse(mAdapter.getStoryUrl(mViewPager.getCurrentItem())));
+			startActivity(i);
+			return true;
 		}
 		return false;
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.story_detail_menu, menu);
 		
-		Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
+		long id = mAdapter.getStoryId(mViewPager.getCurrentItem());
+		Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), id);
 		Cursor cursor = getContentResolver().query(uri, new String[] {SlashdotProvider.STORY_TITLE, SlashdotProvider.STORY_URL}, null, null, null);
 		
 		if (cursor.moveToFirst()) {
-			getMenuInflater().inflate(R.menu.story_detail_menu, menu);
 			mShareProvider = (ShareActionProvider) menu.findItem(R.id.share).getActionProvider();
 	
 			Intent i = new Intent(Intent.ACTION_SEND);

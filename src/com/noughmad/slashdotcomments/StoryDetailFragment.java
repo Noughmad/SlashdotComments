@@ -17,11 +17,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 /**
  * A fragment representing a single Story detail screen. This fragment is either
@@ -139,15 +136,17 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 			summary.setText(Html.fromHtml(cursor.getString(1)));
 			summary.setMovementMethod(LinkMovementMethod.getInstance());
 			
-			ToggleButton button = (ToggleButton) header.findViewById(R.id.toggle);
-			button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
+			header.findViewById(R.id.story_title).setOnClickListener(new View.OnClickListener() {
+				
 				@Override
-				public void onCheckedChanged(CompoundButton buttonView,
-						boolean isChecked) {
-					summary.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-				}});
-			button.setChecked(true);
+				public void onClick(View v) {
+					if (summary.getVisibility() == View.VISIBLE) {
+						summary.setVisibility(View.GONE);
+					} else {
+						summary.setVisibility(View.VISIBLE);
+					}
+				}
+			});
 			
 			getListView().addHeaderView(header);
 			setListAdapter(new CommentsAdapter(getActivity(), null));
