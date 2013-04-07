@@ -133,7 +133,9 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			mCallbacks.onRefreshStateChanged(mUpdatesInProgress > 0);
 
 			SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
-			prefs.edit().putLong("LastUpdate", date.getTimeInMillis()).apply();
+			long currentUpdateMilis = date.getTimeInMillis();
+			long lastUpdateMilis = prefs.getLong("LastUpdate", currentUpdateMilis);
+			prefs.edit().putLong("LastUpdate", Math.min(lastUpdateMilis, currentUpdateMilis)).apply();
 		}
 	};
 
@@ -162,10 +164,16 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 		setListShown(false);
 		
 		getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+			
+			private int mLastScrollPosition = 0;
 
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
+
+				if (mUpdatesInProgress > 0 || firstVisibleItem == mLastScrollPosition) {
+					return;
+				}
 				
 				if ((mUpdatesInProgress == 0) && (firstVisibleItem + visibleItemCount >= totalItemCount - 3)) {
 					// The user scrolled to the bottom
@@ -180,7 +188,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 					calendar.add(Calendar.DAY_OF_MONTH, -1);
 					
 					(new GetStoriesTask()).execute(calendar);
+				} else if (firstVisibleItem == 0) {
+					(new GetStoriesTask()).execute(Calendar.getInstance());
 				}
+				
+				mLastScrollPosition = firstVisibleItem;
 			}
 
 			@Override
