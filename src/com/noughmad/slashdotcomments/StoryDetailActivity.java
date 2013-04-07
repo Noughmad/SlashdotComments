@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.app.Fragment;
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.view.Menu;
@@ -23,7 +23,7 @@ import android.widget.ShareActionProvider;
  * This activity is mostly just a 'shell' activity containing nothing more than
  * a {@link StoryDetailFragment}.
  */
-public class StoryDetailActivity extends FragmentActivity {
+public class StoryDetailActivity extends Activity {
 	
 	private ShareActionProvider mShareProvider;
 	private ViewPager mViewPager;
@@ -93,7 +93,7 @@ public class StoryDetailActivity extends FragmentActivity {
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mAdapter = new StoriesPagerAdapter(getSupportFragmentManager());
+		mAdapter = new StoriesPagerAdapter(getFragmentManager());
 		mViewPager.setAdapter(mAdapter);
 		
 		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

@@ -9,10 +9,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.app.ListFragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -131,11 +131,13 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 		protected void onPostExecute(Calendar date) {
 			mUpdatesInProgress--;
 			mCallbacks.onRefreshStateChanged(mUpdatesInProgress > 0);
-
-			SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
-			long currentUpdateMilis = date.getTimeInMillis();
-			long lastUpdateMilis = prefs.getLong("LastUpdate", currentUpdateMilis);
-			prefs.edit().putLong("LastUpdate", Math.min(lastUpdateMilis, currentUpdateMilis)).apply();
+			
+			if (getActivity() != null) {
+				SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
+				long currentUpdateMilis = date.getTimeInMillis();
+				long lastUpdateMilis = prefs.getLong("LastUpdate", currentUpdateMilis);
+				prefs.edit().putLong("LastUpdate", Math.min(lastUpdateMilis, currentUpdateMilis)).apply();
+			}
 		}
 	};
 

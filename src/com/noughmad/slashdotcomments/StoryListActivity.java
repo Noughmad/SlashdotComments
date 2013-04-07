@@ -1,11 +1,11 @@
 package com.noughmad.slashdotcomments;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +29,7 @@ import com.tapfortap.TapForTap;
  * This activity also implements the required
  * {@link StoryListFragment.Callbacks} interface to listen for item selections.
  */
-public class StoryListActivity extends FragmentActivity implements
+public class StoryListActivity extends Activity implements
 		StoryListFragment.Callbacks {
 
 	/**
@@ -49,7 +49,7 @@ public class StoryListActivity extends FragmentActivity implements
 		if (isTwoPane()) {
 			// In two-pane mode, list items should be given the
 			// 'activated' state when touched.
-			((StoryListFragment) getSupportFragmentManager().findFragmentById(
+			((StoryListFragment) getFragmentManager().findFragmentById(
 					R.id.story_list)).setActivateOnItemClick(true);
 		}
 		
@@ -76,7 +76,7 @@ public class StoryListActivity extends FragmentActivity implements
 			arguments.putLong(StoryDetailFragment.ARG_ITEM_ID, id);
 			StoryDetailFragment fragment = new StoryDetailFragment();
 			fragment.setArguments(arguments);
-			getSupportFragmentManager().beginTransaction()
+			getFragmentManager().beginTransaction()
 					.replace(R.id.story_detail_container, fragment).commit();
 			
 			Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), id);
@@ -126,8 +126,21 @@ public class StoryListActivity extends FragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.refresh_stories:
-			StoryListFragment fragment = (StoryListFragment) getSupportFragmentManager().findFragmentById(R.id.story_list);
+			StoryListFragment fragment = (StoryListFragment) getFragmentManager().findFragmentById(R.id.story_list);
 			fragment.refreshStories();
+			return true;
+			
+		case R.id.open_in_browser:
+			Uri storiesUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
+			StoryDetailFragment detail = (StoryDetailFragment) getFragmentManager().findFragmentById(R.id.story_detail_container);
+			Uri uri = ContentUris.withAppendedId(storiesUri, detail.getStoryId());
+			
+			String[] projection = new String[] {SlashdotProvider.STORY_URL};
+			Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+			if (cursor.moveToFirst()) {
+				Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(cursor.getString(0)));
+				startActivity(i);
+			}
 			return true;
 		}
 		return false;
