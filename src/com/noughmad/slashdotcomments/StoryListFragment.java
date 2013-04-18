@@ -123,8 +123,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 		@Override
 		protected Calendar doInBackground(Calendar... params) {
-			SlashdotContent.refreshStories(getActivity(), params[0]);
-			return params[0];
+			if (SlashdotContent.refreshStories(getActivity(), params[0])) {
+				return params[0];
+			} else {
+				return null;
+			}
 		}
 
 		@Override
@@ -132,12 +135,15 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			mUpdatesInProgress--;
 			mCallbacks.onRefreshStateChanged(mUpdatesInProgress > 0);
 			
-			if (getActivity() != null) {
+			if (date != null && getActivity() != null) {
 				SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
 				long currentUpdateMilis = date.getTimeInMillis();
 				long lastUpdateMilis = prefs.getLong("LastUpdate", currentUpdateMilis);
-				prefs.edit().putLong("LastUpdate", Math.min(lastUpdateMilis, currentUpdateMilis)).apply();
-			}
+				long latestUpdateMilis = prefs.getLong("LatestUpdate", currentUpdateMilis);
+				prefs.edit()
+					.putLong("LastUpdate", Math.min(lastUpdateMilis, currentUpdateMilis))
+					.apply();
+			}			
 		}
 	};
 
@@ -277,7 +283,20 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	}
 	
 	public void refreshStories() {
-		(new GetStoriesTask()).execute(Calendar.getInstance());
+		Calendar now = Calendar.getInstance();
+		(new GetStoriesTask()).execute((Calendar) now.clone());
+
+		SharedPreferences prefs = getActivity().getSharedPreferences("stories", Context.MODE_PRIVATE);
+		if (prefs.contains("LatestUpdate")) {
+			Calendar latest = Calendar.getInstance();
+			latest.setTimeInMillis(prefs.getLong("LatestUpdate", now.getTimeInMillis()));
+			while (now.after(latest)) {
+				now.add(Calendar.DAY_OF_MONTH, -1);
+			}
+		} else {
+			now.add(Calendar.DAY_OF_MONTH, -1);
+			(new GetStoriesTask()).execute((Calendar) now.clone());
+		}
 	}
 
 	@Override

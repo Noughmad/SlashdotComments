@@ -34,7 +34,7 @@ public class SlashdotContent {
 		int level;
 	}
 	
-	public static void refreshStories(Context context, Calendar date) {
+	public static boolean refreshStories(Context context, Calendar date) {
 		if (date == null) {
 			date = Calendar.getInstance();
 		}
@@ -43,10 +43,10 @@ public class SlashdotContent {
 		format.setCalendar(date);
 		String source = "http://slashdot.org/?issue=" + format.format(date.getTime());
 
-		refreshStories(context, source);
+		return refreshStories(context, source);
 	}
 	
-	public static void refreshStories(Context context, String source) {
+	public static boolean refreshStories(Context context, String source) {
 		Log.i("RefreshStories", "Refreshing from " + source);
 		
 		URL url;
@@ -54,7 +54,7 @@ public class SlashdotContent {
 			url = new URL(source);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return;
+			return false;
 		}
 		
 		
@@ -63,7 +63,7 @@ public class SlashdotContent {
 			doc = Jsoup.parse(url, 30000);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return;
+			return false;
 		}
 		
 		Uri storiesUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
@@ -101,6 +101,8 @@ public class SlashdotContent {
 			}
 			existing.close();
 		}
+		
+		return true;
 	}
 	
 	private static void parseComment(Context context, Uri baseUri, Element tree, int level, String parentTitle) {
