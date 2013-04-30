@@ -3,11 +3,21 @@
     android:layout_height="wrap_content"
     android:background="@drawable/story_item_background" >
     
+    <TextView
+        android:id="@+id/story_date_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:padding="8dp"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+        android:background="@drawable/story_title_background_gradient" />
+    
     
     <ImageView
         android:id="@+id/story_indicator_arrow"
         android:layout_width="12dp"
         android:layout_height="32dp"
+        android:layout_below="@+id/story_date_header"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:src="@drawable/list_activated_indicator_arrow" />
@@ -17,8 +27,8 @@
         android:id="@+id/story_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/story_date_header"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/story_indicator_arrow"
         android:paddingLeft="8dp"
         android:paddingTop="8dp"

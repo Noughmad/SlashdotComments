@@ -1,18 +1,20 @@
 package com.noughmad.slashdotcomments;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import android.app.Activity;
+import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.ListFragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 /**
@@ -34,6 +37,8 @@ import android.widget.TextView;
  */
 public class StoryListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+	private static final String TAG = "StoryListFragment";
+	
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
 	 * activated item position. Only used on tablets.
@@ -87,7 +92,8 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	private static final String[] STORIES_COLUMNS = new String[] {
 		SlashdotProvider.ID,
 		SlashdotProvider.STORY_TITLE,
-		SlashdotProvider.STORY_COMMENT_COUNT
+		SlashdotProvider.STORY_COMMENT_COUNT,
+		SlashdotProvider.STORY_DATE
 	}; 
 	
 	private class StoriesAdapter extends CursorAdapter {
@@ -103,6 +109,21 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			
 			TextView comments = (TextView)view.findViewById(R.id.story_comments);
 			comments.setText(String.format("Comments: %d", cursor.getInt(2)));
+			
+			String currentDate = cursor.getString(3);
+			String prevDate = null;
+			if (cursor.getPosition() > 0 && cursor.moveToPrevious()) {
+		        prevDate = cursor.getString(3);
+		        cursor.moveToNext();
+		    }
+
+			TextView date = (TextView)view.findViewById(R.id.story_date_header);
+			if (currentDate != null && currentDate.equals(prevDate)) {
+				date.setVisibility(View.GONE);
+			} else {
+				date.setText(currentDate);
+				date.setVisibility(View.VISIBLE);
+			}
 		}
 
 		@Override
@@ -110,7 +131,6 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			return inflater.inflate(R.layout.item_story, parent, false);
 		}
-		
 	};
 		
 	private class GetStoriesTask extends AsyncTask<Calendar, Void, Calendar> {
@@ -303,15 +323,13 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
 		
-		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, SlashdotProvider.ID + " DESC");
+		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, SlashdotProvider.STORY_TIME + " DESC");
 	}
 
 	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {		
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		((CursorAdapter)getListAdapter()).swapCursor(cursor);
-		if (cursor.getCount() > 0) {
-			setListShown(true);
-		}
+		setListShown(cursor.getCount() > 0);
 	}
 
 	@Override

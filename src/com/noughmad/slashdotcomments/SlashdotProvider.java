@@ -41,7 +41,8 @@ public class SlashdotProvider extends ContentProvider {
 	static final String STORY_SUMMARY = "summary";
 	static final String STORY_COMMENT_COUNT = "comment_count";
 	static final String STORY_URL = "url";
-
+	static final String STORY_DATE = "date";
+	static final String STORY_TIME = "time";
 	
 	static final String COMMENT_STORY = "story";
 	static final String COMMENT_TITLE = "title";
@@ -49,7 +50,7 @@ public class SlashdotProvider extends ContentProvider {
 	static final String COMMENT_LEVEL = "level";
 	static final String COMMENT_CONTENT = "content";
 	static final String COMMENT_AUTHOR = "author";
-	
+
 	private Helper mHelper;
 	
 	@Override
@@ -183,7 +184,7 @@ public class SlashdotProvider extends ContentProvider {
 	private class Helper extends SQLiteOpenHelper {
 
 		private final static String DB_NAME = "slashdot_comments";
-		private final static int DB_VERSION = 1;
+		private final static int DB_VERSION = 2;
 
 		public Helper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
@@ -194,7 +195,9 @@ public class SlashdotProvider extends ContentProvider {
 				+ STORY_TITLE + " TEXT, "
 				+ STORY_COMMENT_COUNT + " INTEGER, "
 				+ STORY_URL + " TEXT, "
-				+ STORY_SUMMARY + " TEXT);";
+				+ STORY_SUMMARY + " TEXT, "
+				+ STORY_DATE + " TEXT, "
+				+ STORY_TIME + " INTEGER);";
 				
 		private static final String CREATE_COMMENTS = "CREATE TABLE " + COMMENTS_TABLE_NAME + " ("
 				+ ID + " INTEGER UNIQUE, "
@@ -220,7 +223,11 @@ public class SlashdotProvider extends ContentProvider {
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			
+			if (oldVersion < 2) {
+				db.execSQL("DROP TABLE IF EXISTS " + STORIES_TABLE_NAME);
+				db.execSQL("DROP TABLE IF EXISTS " + COMMENTS_TABLE_NAME);
+				onCreate(db);
+			}
 		}
 	};
 }

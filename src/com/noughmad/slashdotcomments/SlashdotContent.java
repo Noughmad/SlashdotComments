@@ -1,9 +1,9 @@
 package com.noughmad.slashdotcomments;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -22,17 +22,7 @@ import android.util.Log;
 
 public class SlashdotContent {
 	
-	public static class Comment implements Serializable {
-		private static final long serialVersionUID = 1L;
-		
-		
-		public String author;
-		public String title;
-		public String content;
-		public String score;
-		public long id;
-		int level;
-	}
+	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM d, yyyy '@'hh:mma");
 	
 	public static boolean refreshStories(Context context, Calendar date) {
 		if (date == null) {
@@ -92,6 +82,16 @@ public class SlashdotContent {
 			values.put(SlashdotProvider.STORY_SUMMARY, article.select("div#text-" + id).first().html());
 			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
+			String date = article.select("time").html().substring(3);
+			int timeIndex = date.indexOf('@');
+			values.put(SlashdotProvider.STORY_DATE, date.substring(0, timeIndex - 1));
+			
+			try {
+				values.put(SlashdotProvider.STORY_TIME, sDateFormat.parse(date).getTime());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+						
 			Uri uri = ContentUris.withAppendedId(storiesUri, id);
 			Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
 			if (existing.moveToFirst()) {
