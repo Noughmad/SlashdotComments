@@ -16,9 +16,9 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="ikona.svg"
-   inkscape:export-filename="/home/miha/Programiranje/Workspace/SlashdotComments/res/drawable-mdpi/ic_launcher.png"
-   inkscape:export-xdpi="8.4375"
-   inkscape:export-ydpi="8.4375">
+   inkscape:export-filename="/home/miha/Programiranje/Workspace/SlashdotComments/res/drawable-ldpi/ic_launcher.png"
+   inkscape:export-xdpi="6.328125"
+   inkscape:export-ydpi="6.328125">
   <defs
      id="defs4">
     <linearGradient
@@ -56,7 +56,7 @@
        x2="485.88338"
        y2="796.28853"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-1057.4358,-540.28851)" />
+       gradientTransform="matrix(0.77002654,0,0,1,-999.39581,-540.28851)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3761-9"
@@ -87,7 +87,7 @@
        x2="-556.55249"
        y2="256"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-5.0000126,0)" />
+       gradientTransform="matrix(0.77002654,0,0,1,-184.99232,0)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -96,9 +96,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="122.64882"
-     inkscape:cy="208.40092"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="218.60714"
+     inkscape:cy="235.37489"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -129,34 +129,34 @@
     <rect
        style="color:#000000;fill:url(#linearGradient3805);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2991-4"
-       width="459.61942"
+       width="353.91916"
        height="459.61942"
-       x="-1021.1719"
+       x="-967.47162"
        y="26.190292"
        transform="matrix(0,-1,1,0,0,0)"
-       rx="78.791901"
+       rx="60.671856"
        ry="78.791901" />
     <rect
        style="color:#000000;fill:url(#linearGradient3767);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2991"
-       width="459.61942"
+       width="353.91916"
        height="459.61942"
-       x="-1031.1719"
+       x="-979.17188"
        y="26.190292"
        transform="matrix(0,-1,1,0,0,0)"
-       rx="78.791901"
+       rx="60.671856"
        ry="78.791901" />
     <text
        xml:space="preserve"
-       style="font-size:357.36114502px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Terminal Bold"
-       x="58.997692"
-       y="922.17145"
+       style="font-size:332.48666382px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Terminal Bold"
+       x="72.710243"
+       y="915.41437"
        id="text3769"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3771"
-         x="58.997692"
-         y="922.17145"
-         style="font-size:357.36114502px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
+         x="72.710243"
+         y="915.41437"
+         style="font-size:332.48666382px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
   </g>
 </svg>
