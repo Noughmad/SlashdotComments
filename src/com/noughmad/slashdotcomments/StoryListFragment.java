@@ -1,8 +1,6 @@
 package com.noughmad.slashdotcomments;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.ListFragment;
@@ -23,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 /**
@@ -190,6 +187,8 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 		getLoaderManager().initLoader(0, null, this);
 		setListShown(false);
+		
+		getListView().setFastScrollEnabled(true);
 		
 		getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
 			

@@ -1,8 +1,6 @@
 package com.noughmad.slashdotcomments;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -22,7 +20,8 @@ import android.util.Log;
 
 public class SlashdotContent {
 	
-	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM d, yyyy '@'hh:mma");
+	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM dd, yyyy @hh:mma");
+	public static String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0";
 	
 	public static boolean refreshStories(Context context, Calendar date) {
 		if (date == null) {
@@ -31,7 +30,7 @@ public class SlashdotContent {
 		
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
 		format.setCalendar(date);
-		String source = "http://slashdot.org/?issue=" + format.format(date.getTime());
+		String source = "http://classic.slashdot.org/?issue=" + format.format(date.getTime());
 
 		return refreshStories(context, source);
 	}
@@ -39,26 +38,19 @@ public class SlashdotContent {
 	public static boolean refreshStories(Context context, String source) {
 		Log.i("RefreshStories", "Refreshing from " + source);
 		
-		URL url;
-		try {
-			url = new URL(source);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-		
 		Document doc;
 		try {
-			doc = Jsoup.parse(url, 30000);
+			doc = Jsoup.connect(source).userAgent(USER_AGENT).get();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
 		
 		Uri storiesUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
-		
+				
 		Elements articles = doc.select("article[data-fhid]");
+		Log.d("RefreshStories", "Found " + articles.size() + " articles");
+		
 		for (Element article : articles) {
 			Elements titles = article.select("header h2.story");
 			if (titles.isEmpty()) {
@@ -175,18 +167,10 @@ public class SlashdotContent {
 				return;
 			}
 		}
-		
-		URL url;
-		try {
-			url = new URL(source);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return;
-		}
-		
+
 		Document doc;
 		try {
-			doc = Jsoup.parse(url, 30 * 1000);
+			doc = Jsoup.connect(source).userAgent(USER_AGENT).get();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;

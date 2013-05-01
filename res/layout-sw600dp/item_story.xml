@@ -1,7 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@drawable/list_background_holo" >
     
     
     <TextView
@@ -9,23 +10,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:textAppearance="?android:attr/textAppearanceMediumInverse"
-        android:background="@drawable/story_title_background_gradient" />
+        android:background="#515151" />
     
 <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/story_item_background"
-    android:paddingRight="16dp" > 
+    android:layout_height="wrap_content" 
+    android:background="@drawable/story_item_background" >
+    
+    <ImageView
+        android:id="@+id/story_indicator_arrow"
+        android:layout_width="12dp"
+        android:layout_height="32dp"
+        android:layout_below="@+id/story_date_header"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/list_activated_indicator_arrow" />
+    
 
     <TextView
         android:id="@+id/story_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/story_date_header"
         android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/story_indicator_arrow"
         android:paddingLeft="8dp"
         android:paddingTop="8dp"
-        android:paddingRight="8dp"
+        android:paddingRight="0dp"
         android:textStyle="bold"
         android:textColor="@color/story_item_text_color" />
 
@@ -34,9 +48,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/story_title"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@+id/story_indicator_arrow"
         android:paddingBottom="8dp"
-        android:paddingRight="8dp"
+        android:paddingRight="0dp"
         android:textColor="@color/story_item_text_color_secondary" />
     
 </RelativeLayout>
