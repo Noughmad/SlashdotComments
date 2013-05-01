@@ -16,9 +16,9 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="ikona.svg"
-   inkscape:export-filename="/home/miha/Programiranje/Workspace/SlashdotComments/res/drawable-ldpi/ic_launcher.png"
-   inkscape:export-xdpi="6.328125"
-   inkscape:export-ydpi="6.328125">
+   inkscape:export-filename="/home/miha/Programiranje/Workspace/SlashdotComments/res/drawable-xxhdpi/ic_launcher.png"
+   inkscape:export-xdpi="25.3125"
+   inkscape:export-ydpi="25.3125">
   <defs
      id="defs4">
     <linearGradient
@@ -117,7 +117,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -148,7 +148,7 @@
        ry="85.580132" />
     <text
        xml:space="preserve"
-       style="font-size:361.13168335px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Terminal Bold"
+       style="font-size:361.13168335000000297px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Droid Sans Bold"
        x="56.919109"
        y="925.6712"
        id="text3769"
@@ -157,6 +157,6 @@
          id="tspan3771"
          x="56.919109"
          y="925.6712"
-         style="font-size:361.13168335px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
+         style="font-size:361.13168335000000297px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
   </g>
 </svg>
