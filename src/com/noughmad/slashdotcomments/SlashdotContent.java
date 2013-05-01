@@ -20,7 +20,7 @@ import android.util.Log;
 
 public class SlashdotContent {
 	
-	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM dd, yyyy @hh:mma");
+	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM dd, yyyy @hh:mma", Locale.US);
 	public static String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0";
 	
 	public static boolean refreshStories(Context context, Calendar date) {
@@ -167,6 +167,8 @@ public class SlashdotContent {
 				return;
 			}
 		}
+		
+		Log.i("RefreshComments", "Refreshing from " + source);
 
 		Document doc;
 		try {
