@@ -1,6 +1,7 @@
 package com.noughmad.slashdotcomments;
 
 import java.io.File;
+import java.util.Arrays;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -11,6 +12,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 public class SlashdotProvider extends ContentProvider {
 	
@@ -46,7 +48,8 @@ public class SlashdotProvider extends ContentProvider {
 	
 	static final String COMMENT_STORY = "story";
 	static final String COMMENT_TITLE = "title";
-	static final String COMMENT_SCORE = "score";
+    static final String COMMENT_SCORE_TEXT = "score";
+    static final String COMMENT_SCORE_NUM = "score_num";
 	static final String COMMENT_LEVEL = "level";
 	static final String COMMENT_CONTENT = "content";
 	static final String COMMENT_AUTHOR = "author";
@@ -140,9 +143,15 @@ public class SlashdotProvider extends ContentProvider {
 			return cursor;
 			
 		case CODE_STORY_COMMENTS:
-			selection = COMMENT_STORY + " = ?";
-			selectionArgs = new String[] {uri.getPathSegments().get(1)};
-			cursor = mHelper.getReadableDatabase().query(COMMENTS_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+            if (selection == null) {
+    			selection = COMMENT_STORY + " = ?";
+    			selectionArgs = new String[] {uri.getPathSegments().get(1)};
+            } else {
+                selection = selection + " AND " + COMMENT_STORY + " = ?";
+                selectionArgs = Arrays.copyOf(selectionArgs, selectionArgs.length + 1);
+                selectionArgs[selectionArgs.length-1] = uri.getPathSegments().get(1);
+            }
+            cursor = mHelper.getReadableDatabase().query(COMMENTS_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 			cursor.setNotificationUri(getContext().getContentResolver(), uri);
 			return cursor;
 			
@@ -184,7 +193,7 @@ public class SlashdotProvider extends ContentProvider {
 	private class Helper extends SQLiteOpenHelper {
 
 		private final static String DB_NAME = "slashdot_comments";
-		private final static int DB_VERSION = 2;
+		private final static int DB_VERSION = 3;
 
 		public Helper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
@@ -203,7 +212,8 @@ public class SlashdotProvider extends ContentProvider {
 				+ ID + " INTEGER UNIQUE, "
 				+ COMMENT_STORY + " INTEGER, "
 				+ COMMENT_TITLE + " TEXT, "
-				+ COMMENT_SCORE + " TEXT, "
+                + COMMENT_SCORE_TEXT + " TEXT, "
+                + COMMENT_SCORE_NUM + " INTEGER, "
 				+ COMMENT_CONTENT + " TEXT, "
 				+ COMMENT_AUTHOR + " TEXT, "
 				+ COMMENT_LEVEL + " INTEGER, " +
@@ -227,7 +237,12 @@ public class SlashdotProvider extends ContentProvider {
 				db.execSQL("DROP TABLE IF EXISTS " + STORIES_TABLE_NAME);
 				db.execSQL("DROP TABLE IF EXISTS " + COMMENTS_TABLE_NAME);
 				onCreate(db);
+                return;
 			}
+
+            if (oldVersion < 3) {
+                db.execSQL("ALTER TABLE " + COMMENTS_TABLE_NAME + " ADD COLUMN " + COMMENT_SCORE_NUM + " INTEGER DEFAULT 1");
+            }
 		}
 	};
 }

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 /**
@@ -40,7 +41,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	private static String[] COMMENT_PROJECTION = new String[] {
 		SlashdotProvider.ID,
 		SlashdotProvider.COMMENT_TITLE,
-		SlashdotProvider.COMMENT_SCORE,
+		SlashdotProvider.COMMENT_SCORE_TEXT,
 		SlashdotProvider.COMMENT_CONTENT,
 		SlashdotProvider.COMMENT_LEVEL
 	};
@@ -128,7 +129,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		
 		if (cursor.moveToFirst()) {
 					
-			View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
+			final View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
 			
 			TextView title = (TextView) header.findViewById(R.id.story_title);
 			title.setText(Html.fromHtml(cursor.getString(0)));
@@ -148,10 +149,37 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 					}
 				}
 			});
-			
+
+            SeekBar bar = (SeekBar)header.findViewById(R.id.comment_score_seek);
+            bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, progress));
+                    getActivity().getPreferences(Context.MODE_PRIVATE).edit().putInt("CommentScoreLimit", progress).commit();
+                    Bundle args = new Bundle();
+                    args.putInt("Score", progress);
+                    getLoaderManager().restartLoader(0, args, StoryDetailFragment.this);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+
+            int score = getActivity().getPreferences(Context.MODE_PRIVATE).getInt("CommentScoreLimit", 1);
+            Bundle args = new Bundle();
+            args.putInt("Score", score);
+            getLoaderManager().initLoader(0, args, this);
+            bar.setProgress(score);
+
 			getListView().addHeaderView(header);
 			setListAdapter(new CommentsAdapter(getActivity(), null));
-			getLoaderManager().initLoader(0, null, this);
 			(new GetCommentsTask()).execute(mStoryId);
 		} else {
 			Log.wtf("StoryDetailFragment", "Story with id " + mStoryId + " not found");
@@ -164,9 +192,9 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Uri commentsUri = Uri.withAppendedPath(ContentUris.withAppendedId(
-				Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId), SlashdotProvider.COMMENTS_TABLE_NAME);
+                Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId), SlashdotProvider.COMMENTS_TABLE_NAME);
 
-		return new CursorLoader(getActivity(), commentsUri, COMMENT_PROJECTION, null, null, null);
+		return new CursorLoader(getActivity(), commentsUri, COMMENT_PROJECTION, SlashdotProvider.COMMENT_SCORE_NUM + " >= ?", new String[] {Integer.toString(args.getInt("Score", 1))}, null);
 	}
 
 

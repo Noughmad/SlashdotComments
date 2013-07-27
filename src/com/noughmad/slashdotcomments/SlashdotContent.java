@@ -130,7 +130,16 @@ public class SlashdotContent {
             values.put(SlashdotProvider.COMMENT_AUTHOR, author);
 
             values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
-            values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
+
+            String scoreHtml = comment.select("span.score").first().html();
+            values.put(SlashdotProvider.COMMENT_SCORE_TEXT, scoreHtml);
+            int pos = scoreHtml.indexOf("Score:</span>");
+            String score = scoreHtml.substring(pos + 13, pos + 15);
+            if (!score.startsWith("-")) {
+                score = score.substring(0, 1);
+            }
+            Log.d("ParseComment", "Comment score: " + scoreHtml + " => " + score);
+            values.put(SlashdotProvider.COMMENT_SCORE_NUM, Integer.parseInt(score));
 
             Uri uri = ContentUris.withAppendedId(baseUri, id);
             Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
