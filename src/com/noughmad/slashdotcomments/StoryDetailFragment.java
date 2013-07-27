@@ -176,6 +176,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
             Bundle args = new Bundle();
             args.putInt("Score", score);
             getLoaderManager().initLoader(0, args, this);
+            ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, score));
             bar.setProgress(score);
 
 			getListView().addHeaderView(header);
