@@ -23,6 +23,10 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+
 /**
  * A list fragment representing a list of Stories. This fragment also supports
  * tablet devices by allowing list items to be given an 'activated' state upon
@@ -181,7 +185,10 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
+
+        AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
+        getListView().addFooterView(ad);
+
 		setListAdapter(new StoriesAdapter(getActivity(), null));
 		refreshStories();
 
@@ -225,6 +232,10 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {				
 			}});
+
+        AdRequest request = new AdRequest();
+        request.addTestDevice(AdRequest.TEST_EMULATOR);
+        ad.loadAd(request);
 	}
 
 	@Override

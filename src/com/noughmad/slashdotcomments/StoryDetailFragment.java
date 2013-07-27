@@ -21,6 +21,10 @@ import android.widget.CursorAdapter;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+
 /**
  * A fragment representing a single Story detail screen. This fragment is either
  * contained in a {@link StoryListActivity} in two-pane mode (on tablets) or a
@@ -124,6 +128,9 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		getListView().setDividerHeight(0);
         getListView().setFastScrollEnabled(true);
 
+        AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
+        getListView().addFooterView(ad);
+
         Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
 		Cursor cursor = getActivity().getContentResolver().query(uri, STORY_PROJECTION, null, null, null);
 		
@@ -187,6 +194,10 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		}
 		
 		cursor.close();
+
+        AdRequest request = new AdRequest();
+        request.addTestDevice(AdRequest.TEST_EMULATOR);
+        ad.loadAd(request);
 	}
 
 

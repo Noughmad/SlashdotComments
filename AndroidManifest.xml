@@ -33,7 +33,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".StoryListActivity" />
         </activity>
-        <activity android:name="com.tapfortap.TapForTapActivity"/>
+        <activity android:name="com.google.ads.AdActivity"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <provider
             android:name="com.noughmad.slashdotcomments.SlashdotProvider"
             android:authorities="com.noughmad.slashdotcomments.provider" >
