@@ -121,8 +121,9 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		
 		getListView().setDivider(null);
 		getListView().setDividerHeight(0);
-		
-		Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
+        getListView().setFastScrollEnabled(true);
+
+        Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
 		Cursor cursor = getActivity().getContentResolver().query(uri, STORY_PROJECTION, null, null, null);
 		
 		if (cursor.moveToFirst()) {
