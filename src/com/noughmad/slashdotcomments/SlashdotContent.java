@@ -138,7 +138,6 @@ public class SlashdotContent {
             if (!score.startsWith("-")) {
                 score = score.substring(0, 1);
             }
-            Log.d("ParseComment", "Comment score: " + scoreHtml + " => " + score);
             values.put(SlashdotProvider.COMMENT_SCORE_NUM, Integer.parseInt(score));
 
             Uri uri = ContentUris.withAppendedId(baseUri, id);
