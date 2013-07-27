@@ -98,51 +98,51 @@ public class SlashdotContent {
 	}
 	
 	private static void parseComment(Context context, Uri baseUri, Element tree, int level, String parentTitle) {
-		if (tree.hasClass("hidden")) {
-			return;
-		}
-		
-		Element comment = tree.select("div.cw").first();
-		
-		ContentValues values = new ContentValues();
-		values.put(SlashdotProvider.COMMENT_LEVEL, level);
-		
-		long id = Long.parseLong(comment.id().substring(8));
-		values.put(SlashdotProvider.ID, id);
-				
-		String title = tree.select("a#comment_link_" + id).first().html();
-		if (title.trim().equals("Re:") && parentTitle != null) {
-			if (parentTitle.startsWith("Re:")) {
-				title = parentTitle;
-			} else {
-				title = "Re:" + parentTitle; 
-			}
-		}
-		values.put(SlashdotProvider.COMMENT_TITLE, title);
+        long id = Long.parseLong(tree.id().substring(5));
+        String title = "";
+		if (!tree.hasClass("hidden")) {
 
-		String author = null;
-		Elements authorLinks = comment.select("span.by a");
-		if (!authorLinks.isEmpty()) {
-			author = authorLinks.first().html();
-		} else {
-			author = comment.select("span.by").first().html();
-		}
-		
-		values.put(SlashdotProvider.COMMENT_AUTHOR, author);
-		
-		values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
-		values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
+            Element comment = tree.select("div.cw").first();
 
-		Uri uri = ContentUris.withAppendedId(baseUri, id);
-		Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
-		boolean exists = existing.getCount() > 0;
-		existing.close();
+            ContentValues values = new ContentValues();
+            values.put(SlashdotProvider.COMMENT_LEVEL, level);
 
-		if (exists) {
-			context.getContentResolver().update(uri, values, null, null);
-		} else {
-			context.getContentResolver().insert(uri, values);
-		}
+            values.put(SlashdotProvider.ID, id);
+
+            title = tree.select("a#comment_link_" + id).first().html();
+            if (title.trim().equals("Re:") && parentTitle != null) {
+                if (parentTitle.startsWith("Re:")) {
+                    title = parentTitle;
+                } else {
+                    title = "Re:" + parentTitle;
+                }
+            }
+            values.put(SlashdotProvider.COMMENT_TITLE, title);
+
+            String author = null;
+            Elements authorLinks = comment.select("span.by a");
+            if (!authorLinks.isEmpty()) {
+                author = authorLinks.first().html();
+            } else {
+                author = comment.select("span.by").first().html();
+            }
+
+            values.put(SlashdotProvider.COMMENT_AUTHOR, author);
+
+            values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
+            values.put(SlashdotProvider.COMMENT_SCORE, comment.select("span.score").first().html());
+
+            Uri uri = ContentUris.withAppendedId(baseUri, id);
+            Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, null, null, null);
+            boolean exists = existing.getCount() > 0;
+            existing.close();
+
+            if (exists) {
+                context.getContentResolver().update(uri, values, null, null);
+            } else {
+                context.getContentResolver().insert(uri, values);
+            }
+        }
 		
 		for (Element subTree : tree.select("ul#commtree_" + id + " > li.comment")) {
 			parseComment(context, baseUri, subTree, level + 1, title);
