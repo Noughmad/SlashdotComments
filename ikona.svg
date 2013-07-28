@@ -16,9 +16,9 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="ikona.svg"
-   inkscape:export-filename="/home/miha/Programiranje/Workspace/SlashdotComments/res/drawable-xxhdpi/ic_launcher.png"
-   inkscape:export-xdpi="25.3125"
-   inkscape:export-ydpi="25.3125">
+   inkscape:export-filename="/home/miha/Programiranje/SlashdotComments/ic_launcher-web.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <linearGradient
@@ -56,7 +56,7 @@
        x2="485.88338"
        y2="796.28853"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.83636728,0,0,1.0861538,-1016.8879,-608.89184)" />
+       gradientTransform="matrix(0.92903509,0,0,1.0861538,-1041.3217,-608.89184)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3761-9"
@@ -87,7 +87,7 @@
        x2="-556.55249"
        y2="256"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.83636728,0,0,1.0861538,-132.32046,-22.05539)" />
+       gradientTransform="matrix(0.92903509,0,0,1.0861538,-58.745946,-22.05539)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -105,7 +105,7 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1141"
+     inkscape:window-height="1145"
      inkscape:window-x="-2"
      inkscape:window-y="-3"
      inkscape:window-maximized="1" />
@@ -117,7 +117,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -129,34 +129,34 @@
     <rect
        style="color:#000000;fill:url(#linearGradient3805);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2991-4"
-       width="384.41068"
+       width="427.00262"
        height="499.21741"
-       x="-982.21338"
+       x="-1002.8054"
        y="6.3912964"
        transform="matrix(0,-1,1,0,0,0)"
-       rx="65.898972"
+       rx="73.200455"
        ry="85.580132" />
     <rect
        style="color:#000000;fill:url(#linearGradient3767);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2991"
-       width="384.41068"
+       width="427.00262"
        height="499.21741"
-       x="-994.92163"
+       x="-1016.9216"
        y="6.3912964"
        transform="matrix(0,-1,1,0,0,0)"
-       rx="65.898972"
+       rx="73.200455"
        ry="85.580132" />
     <text
        xml:space="preserve"
-       style="font-size:361.13168335000000297px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Droid Sans Bold"
-       x="56.919109"
-       y="925.6712"
+       style="font-size:408.11685181px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Droid Sans Bold"
+       x="31.017626"
+       y="942.21234"
        id="text3769"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3771"
-         x="56.919109"
-         y="925.6712"
-         style="font-size:361.13168335000000297px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
+         x="31.017626"
+         y="942.21234"
+         style="font-size:408.11685181px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;font-family:Droid Sans;-inkscape-font-specification:Droid Sans Bold">+5</tspan></text>
   </g>
 </svg>

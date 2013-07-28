@@ -1,4 +1,4 @@
-package com.noughmad.slashdotcomments;
+package com.noughmad.plusfive;
 
 import java.io.File;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class SlashdotProvider extends ContentProvider {
 	
 	private static final String TAG = "SlashdotProvider";
 	
-	public static final String AUTHORITY = "com.noughmad.slashdotcomments.provider";
+	public static final String AUTHORITY = "com.noughmad.plusfive.provider";
 	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
 	private static final int CODE_STORIES = 1;
@@ -73,13 +73,13 @@ public class SlashdotProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORIES:
-			return "vnd.android.cursor.dir/vnd.com.noughmad.slashdotcomments.provider.stories";
+			return "vnd.android.cursor.dir/vnd.com.noughmad.plusfive.provider.stories";
 		case CODE_STORY_DETAIL:
-			return "vnd.android.cursor.item/vnd.com.noughmad.slashdotcomments.provider.stories";
+			return "vnd.android.cursor.item/vnd.com.noughmad.plusfive.provider.stories";
 		case CODE_STORY_COMMENTS:
-			return "vnd.android.cursor.dir/vnd.com.noughmad.slashdotcomments.provider.comments";
+			return "vnd.android.cursor.dir/vnd.com.noughmad.plusfive.provider.comments";
 		case CODE_STORY_COMMENT_ID:
-			return "vnd.android.cursor.item/vnd.com.noughmad.slashdotcomments.provider.comments";
+			return "vnd.android.cursor.item/vnd.com.noughmad.plusfive.provider.comments";
 		}
 		return null;
 	}

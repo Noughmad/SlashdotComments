@@ -1,4 +1,4 @@
-package com.noughmad.slashdotcomments;
+package com.noughmad.plusfive;
 
 import android.content.ContentUris;
 import android.content.Context;

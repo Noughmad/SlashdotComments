@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Slashdot Comments</string>
+    <string name="app_name">PlusFive</string>
     <string name="title_story_detail">Story Detail</string>
     <string name="no_comments">No comments</string>
     <string name="comment_score_limit">Score: %d</string>
