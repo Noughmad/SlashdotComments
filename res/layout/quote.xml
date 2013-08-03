@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@color/light_gray"
+             android:padding="8dp">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/quote_loading"
+            android:id="@+id/quote_text"
+            android:layout_gravity="center_horizontal|top"
+            android:padding="8dp"
+            android:background="@drawable/quote_background" />
+</FrameLayout>

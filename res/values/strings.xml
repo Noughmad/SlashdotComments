@@ -5,5 +5,6 @@
     <string name="title_story_detail">Story Detail</string>
     <string name="no_comments">No comments</string>
     <string name="comment_score_limit">Score: %d</string>
+    <string name="quote_loading">Loading Quote...</string>
 
 </resources>

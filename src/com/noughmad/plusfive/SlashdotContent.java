@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -93,6 +94,17 @@ public class SlashdotContent {
 			}
 			existing.close();
 		}
+
+        Elements quote = doc.select("section.bq blockquote.msg p");
+        if (!quote.isEmpty())
+        {
+            ContentValues values = new ContentValues();
+            values.put(SlashdotProvider.QUOTE_DATE, Calendar.getInstance().getTimeInMillis());
+            values.put(SlashdotProvider.QUOTE_CONTENT, quote.first().html());
+
+            Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.QUOTES_TABLE_NAME);
+            context.getContentResolver().insert(uri, values);
+        }
 		
 		return true;
 	}

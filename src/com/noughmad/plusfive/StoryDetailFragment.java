@@ -25,6 +25,8 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
+import java.util.Calendar;
+
 /**
  * A fragment representing a single Story detail screen. This fragment is either
  * contained in a {@link StoryListActivity} in two-pane mode (on tablets) or a
@@ -41,6 +43,8 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	 * The dummy content this fragment is presenting.
 	 */
 	private long mStoryId;
+
+    private TextView mQuoteTextView;
 	
 	private static String[] COMMENT_PROJECTION = new String[] {
 		SlashdotProvider.ID,
@@ -54,8 +58,12 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		SlashdotProvider.STORY_TITLE,
 		SlashdotProvider.STORY_SUMMARY
 	};
-	
-	private class CommentsAdapter extends CursorAdapter {
+
+    private static String[] QUOTE_PROJECTION = new String[] {
+        SlashdotProvider.QUOTE_CONTENT
+    };
+
+    private class CommentsAdapter extends CursorAdapter {
 		
 
 		public CommentsAdapter(Context context, Cursor c) {
@@ -128,6 +136,10 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		getListView().setDividerHeight(0);
         getListView().setFastScrollEnabled(true);
 
+        View quote = getActivity().getLayoutInflater().inflate(R.layout.quote, null, false);
+        mQuoteTextView = (TextView)quote.findViewById(R.id.quote_text);
+        getListView().addFooterView(quote);
+
         AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
         getListView().addFooterView(ad);
 
@@ -195,6 +207,8 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		
 		cursor.close();
 
+        getLoaderManager().initLoader(1, null, this);
+
         AdRequest request = new AdRequest();
         request.addTestDevice(AdRequest.TEST_EMULATOR);
         ad.loadAd(request);
@@ -203,16 +217,36 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		Uri commentsUri = Uri.withAppendedPath(ContentUris.withAppendedId(
-                Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId), SlashdotProvider.COMMENTS_TABLE_NAME);
-
-		return new CursorLoader(getActivity(), commentsUri, COMMENT_PROJECTION, SlashdotProvider.COMMENT_SCORE_NUM + " >= ?", new String[] {Integer.toString(args.getInt("Score", 1))}, null);
+        switch (id)
+        {
+            case 0:
+                Uri commentsUri = Uri.withAppendedPath(ContentUris.withAppendedId(
+                        Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId), SlashdotProvider.COMMENTS_TABLE_NAME);
+                return new CursorLoader(getActivity(), commentsUri, COMMENT_PROJECTION, SlashdotProvider.COMMENT_SCORE_NUM + " >= ?", new String[] {Integer.toString(args.getInt("Score", 1))}, null);
+            case 1:
+                Uri quoteUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.QUOTES_TABLE_NAME);
+                quoteUri = ContentUris.withAppendedId(quoteUri, Calendar.getInstance().getTimeInMillis());
+                return new CursorLoader(getActivity(), quoteUri, QUOTE_PROJECTION, null, null, null);
+        }
+        return null;
 	}
 
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		((CursorAdapter)getListAdapter()).swapCursor(cursor);
+        switch (loader.getId())
+        {
+            case 0:
+                ((CursorAdapter)getListAdapter()).swapCursor(cursor);
+                break;
+
+            case 1:
+                if (cursor.moveToFirst())
+                {
+                    mQuoteTextView.setText(Html.fromHtml(cursor.getString(0)));
+                }
+                break;
+        }
 	}
 
 

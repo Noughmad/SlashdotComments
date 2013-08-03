@@ -5,6 +5,7 @@ import java.util.Calendar;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -58,6 +59,13 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	private int mActivatedPosition = ListView.INVALID_POSITION;
 
 	private int mUpdatesInProgress = 0;
+
+
+    private static String[] QUOTE_PROJECTION = new String[] {
+            SlashdotProvider.QUOTE_CONTENT
+    };
+
+    private TextView mQuoteTextView;
 	
 	/**
 	 * A callback interface that all activities containing this fragment must
@@ -186,6 +194,14 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+        if (mCallbacks.isTwoPane()) {
+            mQuoteTextView = null;
+        } else {
+            View quote = getActivity().getLayoutInflater().inflate(R.layout.quote, null, false);
+            mQuoteTextView = (TextView)quote.findViewById(R.id.quote_text);
+            getListView().addFooterView(quote);
+        }
+
         AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
         getListView().addFooterView(ad);
 
@@ -232,6 +248,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {				
 			}});
+
+        if (!mCallbacks.isTwoPane())
+        {
+            getLoaderManager().initLoader(1, null, this);
+        }
 
         AdRequest request = new AdRequest();
         request.addTestDevice(AdRequest.TEST_EMULATOR);
@@ -331,15 +352,35 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
-		
-		return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, SlashdotProvider.STORY_TIME + " DESC");
+        switch (id)
+        {
+            case 0:
+        		Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
+                return new CursorLoader(getActivity(), uri, STORIES_COLUMNS, null, null, SlashdotProvider.STORY_TIME + " DESC");
+
+            case 1:
+                Uri quoteUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.QUOTES_TABLE_NAME);
+                quoteUri = ContentUris.withAppendedId(quoteUri, Calendar.getInstance().getTimeInMillis());
+                return new CursorLoader(getActivity(), quoteUri, QUOTE_PROJECTION, null, null, null);
+        }
+        return null;
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		((CursorAdapter)getListAdapter()).swapCursor(cursor);
-		setListShown(cursor.getCount() > 0);
+        switch (loader.getId())
+        {
+            case 0:
+        		((CursorAdapter)getListAdapter()).swapCursor(cursor);
+        		setListShown(cursor.getCount() > 0);
+                break;
+
+            case 1:
+                if (cursor.moveToFirst())
+                {
+                    mQuoteTextView.setText(Html.fromHtml(cursor.getString(0)));
+                }
+        }
 	}
 
 	@Override

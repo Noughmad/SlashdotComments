@@ -2,6 +2,7 @@ package com.noughmad.plusfive;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -24,19 +25,24 @@ public class SlashdotProvider extends ContentProvider {
 	private static final int CODE_STORIES = 1;
 	private static final int CODE_STORY_DETAIL = 2;
 	private static final int CODE_STORY_COMMENTS = 3;
-	private static final int CODE_STORY_COMMENT_ID = 4;
-	
+    private static final int CODE_STORY_COMMENT_ID = 4;
+    private static final int CODE_QUOTE_DATE = 5;
+    private static final int CODE_QUOTES = 6;
+
 	static UriMatcher sUriMatcher = new UriMatcher(0);
 	
 	static {
 		sUriMatcher.addURI(AUTHORITY, "stories", CODE_STORIES);
 		sUriMatcher.addURI(AUTHORITY, "stories/#", CODE_STORY_DETAIL);
 		sUriMatcher.addURI(AUTHORITY, "stories/#/comments", CODE_STORY_COMMENTS);
-		sUriMatcher.addURI(AUTHORITY, "stories/#/comments/#", CODE_STORY_COMMENT_ID);
+        sUriMatcher.addURI(AUTHORITY, "stories/#/comments/#", CODE_STORY_COMMENT_ID);
+        sUriMatcher.addURI(AUTHORITY, "quotes", CODE_QUOTES);
+        sUriMatcher.addURI(AUTHORITY, "quotes/#", CODE_QUOTE_DATE);
 	}
 
 	static final String STORIES_TABLE_NAME = "stories";
-	static final String COMMENTS_TABLE_NAME = "comments";
+    static final String COMMENTS_TABLE_NAME = "comments";
+    static final String QUOTES_TABLE_NAME = "quotes";
 
 	static final String ID = "_id";
 	static final String STORY_TITLE = "title";
@@ -54,9 +60,37 @@ public class SlashdotProvider extends ContentProvider {
 	static final String COMMENT_CONTENT = "content";
 	static final String COMMENT_AUTHOR = "author";
 
+    static final String QUOTE_CONTENT = "content";
+    static final String QUOTE_DATE = "date";
+
 	private Helper mHelper;
-	
-	@Override
+
+    private long getDate(long millis)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return cal.getTimeInMillis();
+    }
+
+    private long getDateToday()
+    {
+        Calendar cal = Calendar.getInstance();
+
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return cal.getTimeInMillis();
+    }
+
+    @Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		switch (sUriMatcher.match(uri)) {
 		case CODE_STORY_COMMENTS:
@@ -107,8 +141,14 @@ public class SlashdotProvider extends ContentProvider {
 			values.put(COMMENT_STORY, Long.parseLong(uri.getPathSegments().get(1)));
 			values.put(ID, Long.parseLong(uri.getPathSegments().get(3)));
 			break;
+
+        case CODE_QUOTES:
+            tableName = QUOTES_TABLE_NAME;
+            long date = values.getAsLong(QUOTE_DATE);
+            values.put(QUOTE_DATE, getDate(date));
+            break;
 		}
-				
+
 		if (tableName != null) {
 			long id = mHelper.getWritableDatabase().insert(tableName, null, values);
 			getContext().getContentResolver().notifyChange(uri, null);
@@ -161,6 +201,28 @@ public class SlashdotProvider extends ContentProvider {
 			cursor = mHelper.getReadableDatabase().query(COMMENTS_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 			cursor.setNotificationUri(getContext().getContentResolver(), uri);
 			return cursor;
+
+        case CODE_QUOTE_DATE:
+            selection = QUOTE_DATE + " = ?";
+            selectionArgs = new String[] {Long.toString(getDate(ContentUris.parseId(uri)))};
+            cursor = mHelper.getReadableDatabase().query(QUOTES_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+
+            if (!cursor.moveToFirst()) {
+                selectionArgs = new String[] {Long.toString(getDateToday())};
+                cursor = mHelper.getReadableDatabase().query(QUOTES_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+            }
+
+            if (!cursor.moveToFirst()) {
+                cursor = mHelper.getReadableDatabase().query(QUOTES_TABLE_NAME, projection, null, null, null, null, QUOTE_DATE + " DESC");
+            }
+
+            cursor.setNotificationUri(getContext().getContentResolver(), Uri.withAppendedPath(BASE_URI, QUOTES_TABLE_NAME));
+            return cursor;
+
+        case CODE_QUOTES:
+            cursor = mHelper.getReadableDatabase().query(QUOTES_TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+            cursor.setNotificationUri(getContext().getContentResolver(), Uri.withAppendedPath(BASE_URI, QUOTES_TABLE_NAME));
+            return cursor;
 		}
 		return null;
 	}
@@ -193,7 +255,7 @@ public class SlashdotProvider extends ContentProvider {
 	private class Helper extends SQLiteOpenHelper {
 
 		private final static String DB_NAME = "slashdot_comments";
-		private final static int DB_VERSION = 3;
+		private final static int DB_VERSION = 4;
 
 		public Helper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
@@ -219,16 +281,16 @@ public class SlashdotProvider extends ContentProvider {
 				+ COMMENT_LEVEL + " INTEGER, " +
 				"FOREIGN KEY(" + COMMENT_STORY + ") REFERENCES " + STORIES_TABLE_NAME + "(" + ID + "));";
 
+        private static final String CREATE_QUOTES = "CREATE TABLE " + QUOTES_TABLE_NAME + " ("
+                + ID + " INTEGER PRIMARY KEY, "
+                + QUOTE_CONTENT + " TEXT, "
+                + QUOTE_DATE + " INTEGER);";
+
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL(CREATE_STORIES);
 			db.execSQL(CREATE_COMMENTS);
-			
-			// If an old cache file exists, delete it to free system resources
-			File cache = getContext().getFileStreamPath("stories");
-			if (cache.exists()) {
-				cache.delete();
-			}
+            db.execSQL(CREATE_QUOTES);
 		}
 
 		@Override
@@ -242,6 +304,10 @@ public class SlashdotProvider extends ContentProvider {
 
             if (oldVersion < 3) {
                 db.execSQL("ALTER TABLE " + COMMENTS_TABLE_NAME + " ADD COLUMN " + COMMENT_SCORE_NUM + " INTEGER DEFAULT 1");
+            }
+
+            if (oldVersion < 4) {
+                db.execSQL(CREATE_QUOTES);
             }
 		}
 	};
