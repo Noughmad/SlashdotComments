@@ -103,12 +103,17 @@ public class SlashdotContent {
         Elements quote = doc.select("section.bq blockquote.msg p");
         if (!quote.isEmpty())
         {
-            ContentValues values = new ContentValues();
-            values.put(SlashdotProvider.QUOTE_DATE, Calendar.getInstance().getTimeInMillis());
-            values.put(SlashdotProvider.QUOTE_CONTENT, quote.first().html());
-
             Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.QUOTES_TABLE_NAME);
-            context.getContentResolver().insert(uri, values);
+
+            Cursor existing = context.getContentResolver().query(uri, new String[] {SlashdotProvider.ID}, SlashdotProvider.QUOTE_CONTENT + " = ?", new String[] {quote.first().html()}, null);
+            if (!existing.moveToFirst())
+            {
+                ContentValues values = new ContentValues();
+                values.put(SlashdotProvider.QUOTE_DATE, Calendar.getInstance().getTimeInMillis());
+                values.put(SlashdotProvider.QUOTE_CONTENT, quote.first().html());
+                context.getContentResolver().insert(uri, values);
+            }
+            existing.close();
         }
 		
 		return true;
