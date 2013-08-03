@@ -40,7 +40,7 @@ public class SlashdotContent {
 		Log.i("RefreshStories", "Refreshing from " + source);
 
         if (context == null) {
-            Log.w("RefreshStories", "Trying to refreshing without a Context");
+            Log.w("RefreshStories", "Trying to refresh without a Context");
             return false;
         }
 		
@@ -176,7 +176,7 @@ public class SlashdotContent {
 	
 	public static void refreshComments(Context context, long storyId, String source) {
         if (context == null) {
-            Log.w("RefreshComments", "Trying to refreshing comments without a Context");
+            Log.w("RefreshComments", "Trying to refresh comments without a Context");
             return;
         }
 
