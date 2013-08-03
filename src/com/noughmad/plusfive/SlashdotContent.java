@@ -38,6 +38,11 @@ public class SlashdotContent {
 	
 	public static boolean refreshStories(Context context, String source) {
 		Log.i("RefreshStories", "Refreshing from " + source);
+
+        if (context == null) {
+            Log.w("RefreshStories", "Trying to refreshing without a Context");
+            return false;
+        }
 		
 		Document doc;
 		try {
@@ -170,11 +175,13 @@ public class SlashdotContent {
 	}
 	
 	public static void refreshComments(Context context, long storyId, String source) {
-		if (context == null) {
-			return;
-		}
-		
-		Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), storyId);
+        if (context == null) {
+            Log.w("RefreshComments", "Trying to refreshing comments without a Context");
+            return;
+        }
+
+
+        Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), storyId);
 		
 		if (source == null) {
 			Cursor story = context.getContentResolver().query(storyUri, new String[] {SlashdotProvider.STORY_URL}, null, null, null);
