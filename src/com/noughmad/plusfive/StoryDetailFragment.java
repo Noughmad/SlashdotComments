@@ -173,10 +173,10 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
             bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, progress));
-                    getActivity().getPreferences(Context.MODE_PRIVATE).edit().putInt("CommentScoreLimit", progress).commit();
+                    ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, progress-1));
+                    getActivity().getPreferences(Context.MODE_PRIVATE).edit().putInt("CommentScoreLimit", progress-1).commit();
                     Bundle args = new Bundle();
-                    args.putInt("Score", progress);
+                    args.putInt("Score", progress-1);
                     getLoaderManager().restartLoader(0, args, StoryDetailFragment.this);
                 }
 
@@ -196,7 +196,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
             args.putInt("Score", score);
             getLoaderManager().initLoader(0, args, this);
             ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, score));
-            bar.setProgress(score);
+            bar.setProgress(score+1);
 
 			getListView().addHeaderView(header);
 			setListAdapter(new CommentsAdapter(getActivity(), null));

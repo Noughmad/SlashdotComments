@@ -1,5 +1,6 @@
 package com.noughmad.plusfive;
 
+import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
@@ -150,6 +151,10 @@ public class StoryDetailActivity extends Activity {
 				       Uri.parse(mAdapter.getStoryUrl(mViewPager.getCurrentItem())));
 			startActivity(i);
 			return true;
+
+        case R.id.login:
+            DialogFragment newFragment = new LoginFragment();
+            newFragment.show(getFragmentManager(), "login");
 		}
 		return false;
 	}

@@ -38,12 +38,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/story_summary"
-        android:max="5"
-        android:progress="1"
+        android:max="6"
+        android:progress="2"
         android:padding="16dp"
         android:layout_toRightOf="@+id/comment_score_limit"/>
 
-
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/post"
+            android:id="@+id/postButton"
+            android:layout_below="@+id/comment_score_limit"
+            android:minHeight="0dp"
+            android:layout_alignParentLeft="true"/>
 
 
 </RelativeLayout>

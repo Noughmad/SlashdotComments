@@ -1,15 +1,24 @@
 package com.noughmad.plusfive;
 
 import android.app.Activity;
+import android.content.Context;
+import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
+import android.widget.Toast;
+
+import java.io.IOException;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -130,7 +139,17 @@ public class StoryListActivity extends Activity implements
 				startActivity(i);
 			}
 			return true;
-		}
+
+        case R.id.login:
+            DialogFragment newFragment = new LoginFragment();
+            newFragment.show(getFragmentManager(), "login");
+            return true;
+
+        case R.id.logout:
+            logout();
+            return true;
+        }
+
 		return false;
 	}
 	
@@ -141,6 +160,13 @@ public class StoryListActivity extends Activity implements
 		} else {
 			menu.getItem(0).setActionView(null);
 		}
+
+        boolean logged = SlashdotContent.isLoggedIn(this);
+
+
+        menu.findItem(R.id.login).setVisible(!logged);
+        menu.findItem(R.id.logout).setVisible(logged);
+
 		return true;
 	}
 
@@ -151,6 +177,31 @@ public class StoryListActivity extends Activity implements
 			invalidateOptionsMenu();
 		}
 	}
-	
-	
+
+    void logout() {
+        /*
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            protected Void doInBackground(Void... params) {
+                try {
+                    Jsoup.connect("http://slashdot.org/my/logout")
+                        .cookie("user", getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
+                        .method(Connection.Method.GET).execute();
+                } catch (IOException e) {
+
+                }
+
+                getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().remove("user").commit();
+                return null;
+            }
+
+            protected void onPostExecute(Void v) {
+                invalidateOptionsMenu();
+            }
+        };
+        */
+
+        getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().remove("user").commit();
+        invalidateOptionsMenu();
+        Toast.makeText(this, R.string.logout_success, Toast.LENGTH_SHORT).show();
+    }
 }

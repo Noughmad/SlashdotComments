@@ -4,25 +4,38 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Date;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SlashdotContent {
 	
 	public static SimpleDateFormat sDateFormat = new SimpleDateFormat("EEEE MMM dd, yyyy @hh:mma", Locale.US);
 	public static String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0";
+
+    public static boolean isLoggedIn(Context context) {
+        return context.getSharedPreferences("cookie", Context.MODE_PRIVATE).contains("user");
+    }
 	
 	public static boolean refreshStories(Context context, Calendar date) {
 		if (date == null) {
@@ -46,7 +59,10 @@ public class SlashdotContent {
 		
 		Document doc;
 		try {
-			doc = Jsoup.connect(source).userAgent(USER_AGENT).get();
+			doc = Jsoup.connect(source)
+                    .userAgent(USER_AGENT)
+          //          .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
+                    .get();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -81,7 +97,24 @@ public class SlashdotContent {
 			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
 			String date = article.select("time").html().substring(3);
-			int timeIndex = date.indexOf('@');
+            int timeIndex = 0;
+            if (date.contains("@")) {
+    			timeIndex = date.indexOf('@');
+            } else {
+                Pattern p = Pattern.compile("\\d{2}:\\d{2}");
+                Matcher match = p.matcher(date);
+                if (match.find()) {
+                    timeIndex = match.start();
+                } else {
+                    timeIndex = -1;
+                }
+            }
+
+            if (timeIndex < 0 || timeIndex >= date.length()) {
+                Log.e("RefreshStories", "Unable to parse date " + date);
+                continue;
+            }
+
 			values.put(SlashdotProvider.STORY_DATE, date.substring(0, timeIndex - 1));
 			
 			try {
@@ -204,7 +237,10 @@ public class SlashdotContent {
 
 		Document doc;
 		try {
-			doc = Jsoup.connect(source).userAgent(USER_AGENT).get();
+			doc = Jsoup.connect(source)
+                    .userAgent(USER_AGENT)
+                    .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
+                    .get();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
@@ -217,4 +253,51 @@ public class SlashdotContent {
 			parseComment(context, baseUri, tree, 0, null);			
 		}
 	};
+
+    public static Map<String, String> replyParameters(Context context, long storyId, long commentId) {
+        String url = String.format("//yro.slashdot.org/comments.pl?sid=%d&op=Reply&threshold=1&commentsort=0&mode=thread&pid=%s", storyId, commentId);
+
+        Document doc;
+        try {
+            doc = Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
+                    .get();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        Element form = doc.select("form").first();
+        String action = form.attr("action");
+        if (!action.startsWith("http")) {
+            action = "http:" + action;
+        }
+
+        Map<String, String> args = new HashMap<String, String>();
+        args.put("action", action);
+
+        Element key = form.select("input[name=formkey]").first();
+        args.put("formkey", key.val());
+
+        Element subject = form.select("input[name=postersubj]").first();
+        args.put("postersubj", subject.val());
+
+        return args;
+    }
+
+    public static boolean postReply(Context context, String url, Map<String, String> data) {
+        try {
+            Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
+                    .data(data)
+                    .method(Connection.Method.POST)
+                    .execute();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

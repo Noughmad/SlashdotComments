@@ -6,5 +6,15 @@
     <string name="no_comments">No comments</string>
     <string name="comment_score_limit">Score: %d</string>
     <string name="quote_loading">Loading Quote...</string>
+    <string name="account">My Account</string>
+    <string name="login">Log In</string>
+    <string name="logout">Log Out</string>
+    <string name="nickname">Nickname</string>
+    <string name="password">Password</string>
+    <string name="login_failed">Login failed</string>
+    <string name="login_success">Logged in as %s</string>
+    <string name="logout_success">Log out successful</string>
+    <string name="reply">Reply to this</string>
+    <string name="post">Post comment</string>
 
 </resources>
