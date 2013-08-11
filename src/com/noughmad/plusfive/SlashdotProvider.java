@@ -50,8 +50,9 @@ public class SlashdotProvider extends ContentProvider {
 	static final String STORY_COMMENT_COUNT = "comment_count";
 	static final String STORY_URL = "url";
 	static final String STORY_DATE = "date";
-	static final String STORY_TIME = "time";
-	
+    static final String STORY_TIME = "time";
+    static final String STORY_SID = "sid";
+
 	static final String COMMENT_STORY = "story";
 	static final String COMMENT_TITLE = "title";
     static final String COMMENT_SCORE_TEXT = "score";
@@ -254,7 +255,7 @@ public class SlashdotProvider extends ContentProvider {
 	private class Helper extends SQLiteOpenHelper {
 
 		private final static String DB_NAME = "slashdot_comments";
-		private final static int DB_VERSION = 4;
+		private final static int DB_VERSION = 5;
 
 		public Helper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
@@ -267,7 +268,8 @@ public class SlashdotProvider extends ContentProvider {
 				+ STORY_URL + " TEXT, "
 				+ STORY_SUMMARY + " TEXT, "
 				+ STORY_DATE + " TEXT, "
-				+ STORY_TIME + " INTEGER);";
+				+ STORY_TIME + " INTEGER, "
+                + STORY_SID + " INTEGER);";
 				
 		private static final String CREATE_COMMENTS = "CREATE TABLE " + COMMENTS_TABLE_NAME + " ("
 				+ ID + " INTEGER UNIQUE, "
@@ -307,6 +309,10 @@ public class SlashdotProvider extends ContentProvider {
 
             if (oldVersion < 4) {
                 db.execSQL(CREATE_QUOTES);
+            }
+
+            if (oldVersion < 5) {
+                db.execSQL("ALTER TABLE " + STORIES_TABLE_NAME + " ADD COLUMN " + STORY_SID + " INTEGER DEFAULT 0");
             }
 		}
 	};

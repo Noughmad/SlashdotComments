@@ -17,6 +17,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.*;
+import android.R;
 import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -56,7 +58,7 @@ public class SlashdotContent {
             Log.w("RefreshStories", "Trying to refresh without a Context");
             return false;
         }
-		
+
 		Document doc;
 		try {
 			doc = Jsoup.connect(source)
@@ -245,6 +247,17 @@ public class SlashdotContent {
 			e.printStackTrace();
 			return;
 		}
+
+        Element postButton = doc.select("section#d2header a.btn").first();
+        String replyUrl = postButton.attr("href");
+        int sidStart = replyUrl.indexOf("sid=") + 4;
+        int sidEnd = replyUrl.indexOf('&', sidStart);
+
+        long sid = Long.parseLong(replyUrl.substring(sidStart, sidEnd));
+
+        ContentValues values = new ContentValues();
+        values.put(SlashdotProvider.STORY_SID, sid);
+        context.getContentResolver().update(storyUri, values, null, null);
 		
 		Uri baseUri = Uri.withAppendedPath(storyUri, SlashdotProvider.COMMENTS_TABLE_NAME);
 		context.getContentResolver().delete(baseUri, null, null);
@@ -254,8 +267,15 @@ public class SlashdotContent {
 		}
 	};
 
-    public static Map<String, String> replyParameters(Context context, long storyId, long commentId) {
-        String url = String.format("//yro.slashdot.org/comments.pl?sid=%d&op=Reply&threshold=1&commentsort=0&mode=thread&pid=%s", storyId, commentId);
+    public static Bundle replyParameters(Context context, long storyId, long commentId) {
+        String url = "";
+        if (commentId > 0) {
+            url = String.format("http://slashdot.org/comments.pl?sid=%d&op=Reply&threshold=1&commentsort=0&mode=thread&pid=%s", storyId, commentId);
+        } else {
+            url = String.format("http://slashdot.org/comments.pl?sid=%d&op=Reply&threshold=1&commentsort=0&mode=thread", storyId);
+        }
+
+        Log.d("ReplyParameters", "Requesting reply to " + url);
 
         Document doc;
         try {
@@ -268,33 +288,50 @@ public class SlashdotContent {
             return null;
         }
 
-        Element form = doc.select("form").first();
+        Element form = doc.select("div#comments form").first();
+
         String action = form.attr("action");
         if (!action.startsWith("http")) {
             action = "http:" + action;
         }
 
-        Map<String, String> args = new HashMap<String, String>();
-        args.put("action", action);
+        Bundle args = new Bundle();
+        args.putString("action", action);
+
+        Log.i("ReplyParameters", action);
 
         Element key = form.select("input[name=formkey]").first();
-        args.put("formkey", key.val());
+        args.putString("formkey", key.val());
 
         Element subject = form.select("input[name=postersubj]").first();
-        args.put("postersubj", subject.val());
+        args.putString("postersubj", subject.val());
 
         return args;
     }
 
     public static boolean postReply(Context context, String url, Map<String, String> data) {
         try {
-            Jsoup.connect(url)
+            data.put("op", "Submit");
+            Log.d("PostReply", data.toString());
+
+            Connection.Response response = Jsoup.connect(url)
                     .userAgent(USER_AGENT)
                     .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
                     .data(data)
                     .method(Connection.Method.POST)
                     .execute();
-            return true;
+
+            Log.i("PostReply", "Return code: " + response.statusCode());
+
+            Document doc = response.parse();
+            Element error = doc.select("#comments p.error").first();
+
+            if (error != null) {
+                Log.e("PostReply", error.html());
+                return false;
+            } else {
+                return true;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;

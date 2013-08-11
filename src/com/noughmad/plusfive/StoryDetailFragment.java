@@ -2,6 +2,7 @@ package com.noughmad.plusfive;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,7 +43,9 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	/**
 	 * The dummy content this fragment is presenting.
 	 */
-	private long mStoryId;
+    private long mStoryId;
+    private long mStorySid = 0;
+    private View mHeader;
 
     private TextView mQuoteTextView;
 	
@@ -56,7 +59,8 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 	
 	private static String[] STORY_PROJECTION = new String[] {
 		SlashdotProvider.STORY_TITLE,
-		SlashdotProvider.STORY_SUMMARY
+		SlashdotProvider.STORY_SUMMARY,
+        SlashdotProvider.STORY_SID
 	};
 
     private static String[] QUOTE_PROJECTION = new String[] {
@@ -71,7 +75,7 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 		}
 
 		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
+		public void bindView(View view, Context context, final Cursor cursor) {
 			TextView title = (TextView)view.findViewById(R.id.comment_title);
 			title.setText(Html.fromHtml(cursor.getString(1)) + " " + Html.fromHtml(cursor.getString(2)));
 			
@@ -81,6 +85,22 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
 			
 			int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4 + 8 * cursor.getInt(4), getResources().getDisplayMetrics());
 			view.setPadding(px, 0, 0, 4);
+
+            final long commentId = cursor.getLong(0);
+
+            view.findViewById(R.id.replyButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mStorySid > 0)
+                    {
+                        Intent intent = new Intent(getActivity(), ReplyActivity.class);
+                        intent.putExtra("story_id", mStoryId);
+                        intent.putExtra("sid", mStorySid);
+                        intent.putExtra("pid", commentId);
+                        startActivity(intent);
+                    }
+                }
+            });
 		}
 
 		@Override
@@ -143,70 +163,67 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
         AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
         getListView().addFooterView(ad);
 
-        Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
-		Cursor cursor = getActivity().getContentResolver().query(uri, STORY_PROJECTION, null, null, null);
-		
-		if (cursor.moveToFirst()) {
-					
-			final View header = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
-			
-			TextView title = (TextView) header.findViewById(R.id.story_title);
-			title.setText(Html.fromHtml(cursor.getString(0)));
-			
-			final TextView summary = (TextView) header.findViewById(R.id.story_summary);
-			summary.setText(Html.fromHtml(cursor.getString(1)));
-			summary.setMovementMethod(LinkMovementMethod.getInstance());
-			
-			header.findViewById(R.id.story_title).setOnClickListener(new View.OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					if (summary.getVisibility() == View.VISIBLE) {
-						summary.setVisibility(View.GONE);
-					} else {
-						summary.setVisibility(View.VISIBLE);
-					}
-				}
-			});
+        mHeader = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
+        final TextView summary = (TextView) mHeader.findViewById(R.id.story_summary);
 
-            SeekBar bar = (SeekBar)header.findViewById(R.id.comment_score_seek);
-            bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, progress-1));
-                    getActivity().getPreferences(Context.MODE_PRIVATE).edit().putInt("CommentScoreLimit", progress-1).commit();
-                    Bundle args = new Bundle();
-                    args.putInt("Score", progress-1);
-                    getLoaderManager().restartLoader(0, args, StoryDetailFragment.this);
+        mHeader.findViewById(R.id.story_title).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (summary.getVisibility() == View.VISIBLE) {
+                    summary.setVisibility(View.GONE);
+                } else {
+                    summary.setVisibility(View.VISIBLE);
                 }
+            }
+        });
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
+        mHeader.findViewById(R.id.postButton).setEnabled(false);
 
-                }
+        SeekBar bar = (SeekBar)mHeader.findViewById(R.id.comment_score_seek);
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                ((TextView)mHeader.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, progress-1));
+                getActivity().getPreferences(Context.MODE_PRIVATE).edit().putInt("CommentScoreLimit", progress-1).commit();
+                Bundle args = new Bundle();
+                args.putInt("Score", progress-1);
+                getLoaderManager().restartLoader(0, args, StoryDetailFragment.this);
+            }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
 
-                }
-            });
+            }
 
-            int score = getActivity().getPreferences(Context.MODE_PRIVATE).getInt("CommentScoreLimit", 1);
-            Bundle args = new Bundle();
-            args.putInt("Score", score);
-            getLoaderManager().initLoader(0, args, this);
-            ((TextView)header.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, score));
-            bar.setProgress(score+1);
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
 
-			getListView().addHeaderView(header);
-			setListAdapter(new CommentsAdapter(getActivity(), null));
-			(new GetCommentsTask()).execute(mStoryId);
-		} else {
-			Log.wtf("StoryDetailFragment", "Story with id " + mStoryId + " not found");
-		}
-		
-		cursor.close();
+            }
+        });
 
+        int score = getActivity().getPreferences(Context.MODE_PRIVATE).getInt("CommentScoreLimit", 1);
+        Bundle args = new Bundle();
+        args.putInt("Score", score);
+        ((TextView)mHeader.findViewById(R.id.comment_score_limit)).setText(getResources().getString(R.string.comment_score_limit, score));
+        bar.setProgress(score+1);
+
+        mHeader.findViewById(R.id.postButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ReplyActivity.class);
+                intent.putExtra("story_id", mStoryId);
+                intent.putExtra("sid", mStorySid);
+                startActivity(intent);
+            }
+        });
+
+        getListView().addHeaderView(mHeader);
+        setListAdapter(new CommentsAdapter(getActivity(), null));
+        (new GetCommentsTask()).execute(mStoryId);
+
+        getLoaderManager().initLoader(0, args, this);
+        getLoaderManager().initLoader(2, null, this);
         getLoaderManager().initLoader(1, null, this);
 
         AdRequest request = new AdRequest();
@@ -227,6 +244,9 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
                 Uri quoteUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.QUOTES_TABLE_NAME);
                 quoteUri = ContentUris.withAppendedId(quoteUri, Calendar.getInstance().getTimeInMillis());
                 return new CursorLoader(getActivity(), quoteUri, QUOTE_PROJECTION, null, null, null);
+            case 2:
+                Uri storyUri = ContentUris.withAppendedId(Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME), mStoryId);
+                return new CursorLoader(getActivity(), storyUri, STORY_PROJECTION, null, null, null);
         }
         return null;
 	}
@@ -244,6 +264,25 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
                 if (cursor.moveToFirst())
                 {
                     mQuoteTextView.setText(Html.fromHtml(cursor.getString(0)));
+                }
+                break;
+            
+            case 2:
+                if (cursor.moveToFirst()) {
+        
+                    TextView title = (TextView) mHeader.findViewById(R.id.story_title);
+                    title.setText(Html.fromHtml(cursor.getString(0)));
+    
+                    TextView summary = (TextView) mHeader.findViewById(R.id.story_summary);
+                    summary.setText(Html.fromHtml(cursor.getString(1)));
+                    summary.setMovementMethod(LinkMovementMethod.getInstance());
+
+                    if (cursor.getLong(2) != mStorySid) {
+                        mStorySid = cursor.getLong(2);
+                        mHeader.findViewById(R.id.postButton).setEnabled(mStoryId > 0);
+                    }
+                } else {
+                    Log.wtf("StoryDetailFragment", "Story with id " + mStoryId + " not found");
                 }
                 break;
         }

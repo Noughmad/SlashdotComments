@@ -16,5 +16,11 @@
     <string name="logout_success">Log out successful</string>
     <string name="reply">Reply to this</string>
     <string name="post">Post comment</string>
+    <string name="submit">Submit</string>
+    <string name="comment_body">Comment</string>
+    <string name="comment_subject">Subject</string>
+    <string name="comment_posted">Comment posted successfully</string>
+    <string name="comment_post_error">Unable to post a comment</string>
+    <string name="post_ac">Post Anonymously</string>
 
 </resources>

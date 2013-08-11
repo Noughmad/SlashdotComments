@@ -5,4 +5,40 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+
+    <include layout="@layout/item_comment"/>
+
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/reply_subject"
+            android:hint="@string/comment_subject"
+            android:layout_gravity="left" />
+
+
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:hint="@string/comment_body"
+            android:ems="10"
+            android:id="@+id/reply_body" />
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/post_ac"
+            android:id="@+id/post_anon"
+            android:layout_gravity="left|center_vertical"
+            android:checked="false"/>
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:id="@+id/reply_submit"
+            android:layout_gravity="left"/>
+
+
 </LinearLayout>
