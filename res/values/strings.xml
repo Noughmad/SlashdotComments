@@ -23,6 +23,7 @@
     <string name="comment_post_error">Unable to post a comment</string>
     <string name="post_ac">Post Anonymously</string>
     <string name="unable_reply">Unable to post a comment</string>
+    <string name="post_comment">Post comment</string>
     <string name="welcome_message">Welcome to PlusFive!\n\nIf you log in with your Slashdot account, the comments will be shown according to your account settings.\n\nYou will also be able to post comments.</string>
 
 </resources>
