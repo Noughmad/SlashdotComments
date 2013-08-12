@@ -1,9 +1,5 @@
 package com.noughmad.plusfive;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Calendar;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -13,7 +9,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.util.Log;
+
+import java.util.Arrays;
+import java.util.Calendar;
 
 public class SlashdotProvider extends ContentProvider {
 	

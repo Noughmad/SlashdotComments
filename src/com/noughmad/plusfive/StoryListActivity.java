@@ -1,24 +1,18 @@
 package com.noughmad.plusfive;
 
 import android.app.Activity;
-import android.content.Context;
 import android.app.DialogFragment;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
-
-import java.io.IOException;
-
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 
 /**
  * An activity representing a list of Stories. This activity has different

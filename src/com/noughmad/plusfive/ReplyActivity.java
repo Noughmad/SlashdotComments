@@ -2,13 +2,6 @@ package com.noughmad.plusfive;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
-import android.app.LoaderManager;
-import android.content.ContentUris;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 

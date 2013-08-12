@@ -1,7 +1,5 @@
 package com.noughmad.plusfive;
 
-import java.util.Calendar;
-
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -27,6 +25,8 @@ import android.widget.TextView;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+
+import java.util.Calendar;
 
 /**
  * A list fragment representing a list of Stories. This fragment also supports
