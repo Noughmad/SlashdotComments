@@ -143,4 +143,14 @@ public class LoginFragment extends DialogFragment {
 
         task.execute(nickname, password);
     }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        ReplyActivity reply = (ReplyActivity)getActivity();
+        if (reply != null) {
+            reply.onLoggedIn();
+        }
+    }
 }

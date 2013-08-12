@@ -6,7 +6,13 @@
               android:layout_height="match_parent">
 
 
-    <include layout="@layout/item_comment"/>
+    <include
+            android:id="@+id/include_comment"
+            layout="@layout/item_comment" />
+
+    <include
+            android:id="@+id/include_story"
+            layout="@layout/story_header"/>
 
 
     <EditText

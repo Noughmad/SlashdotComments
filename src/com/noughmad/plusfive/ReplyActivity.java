@@ -1,7 +1,10 @@
 package com.noughmad.plusfive;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,12 +20,26 @@ public class ReplyActivity extends Activity {
 
         Log.d("ReplyActivity", "Story Id:" + getIntent().getLongExtra("sid", 0));
 
-        ReplyFragment fragment = new ReplyFragment();
-        fragment.setArguments(getIntent().getExtras());
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        if (SlashdotContent.isLoggedIn(this)) {
+            onLoggedIn();
+        } else {
+            DialogFragment newFragment = new LoginFragment();
+            newFragment.show(getFragmentManager(), "login");
+        }
+    }
 
-        ft.add(R.id.container, fragment);
-        ft.commit();
+    public void onLoggedIn() {
+        if (SlashdotContent.isLoggedIn(this)) {
+            ReplyFragment fragment = new ReplyFragment();
+            fragment.setArguments(getIntent().getExtras());
+
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+
+            ft.add(R.id.container, fragment);
+            ft.commit();
+        } else {
+            finish();
+        }
     }
 }

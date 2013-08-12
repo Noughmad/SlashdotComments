@@ -22,5 +22,6 @@
     <string name="comment_posted">Comment posted successfully</string>
     <string name="comment_post_error">Unable to post a comment</string>
     <string name="post_ac">Post Anonymously</string>
+    <string name="unable_reply">Unable to post a comment</string>
 
 </resources>

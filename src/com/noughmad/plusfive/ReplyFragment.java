@@ -35,9 +35,15 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
             SlashdotProvider.COMMENT_CONTENT
     };
 
+    private final static String[] STORY_PROJECTION = new String[] {
+            SlashdotProvider.STORY_TITLE,
+            SlashdotProvider.STORY_SUMMARY
+    };
+
     private final static String TAG = "ReplyFragment";
 
     private Bundle mReplyArgs = null;
+    private boolean hasComment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +54,6 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.reply_fragment, container, false);
 
-        view.findViewById(R.id.replyButton).setVisibility(View.GONE);
         view.findViewById(R.id.reply_submit).setEnabled(false);
         view.findViewById(R.id.reply_submit).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +107,20 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
         long sid = getArguments().getLong("sid", 0);
         long pid = getArguments().getLong("pid", 0);
 
+        hasComment = pid > 0;
+
+        View view = getView();
+        if (hasComment) {
+            view.findViewById(R.id.include_story).setVisibility(View.GONE);
+            view.findViewById(R.id.replyButton).setVisibility(View.GONE);
+
+        } else {
+            view.findViewById(R.id.include_comment).setVisibility(View.GONE);
+            view.findViewById(R.id.comment_score_limit).setVisibility(View.GONE);
+            view.findViewById(R.id.comment_score_seek).setVisibility(View.GONE);
+            view.findViewById(R.id.postButton).setVisibility(View.GONE);
+        }
+
         AsyncTask<Long, Void, Bundle> task = new AsyncTask<Long, Void, Bundle>() {
             @Override
             protected Bundle doInBackground(Long... params) {
@@ -110,9 +129,14 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
 
             @Override
             protected void onPostExecute(Bundle args) {
-                ((EditText)getView().findViewById(R.id.reply_subject)).setText(args.getString("postersubj"));
-                mReplyArgs = args;
-                getView().findViewById(R.id.reply_submit).setEnabled(true);
+                if (args == null) {
+                    Toast.makeText(getActivity(), R.string.unable_reply, Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
+                } else {
+                    ((EditText)getView().findViewById(R.id.reply_subject)).setText(args.getString("postersubj"));
+                    mReplyArgs = args;
+                    getView().findViewById(R.id.reply_submit).setEnabled(true);
+                }
             }
         };
 
@@ -136,15 +160,17 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
         uri = ContentUris.withAppendedId(uri, args.getLong("story_id"));
+        String[] projection = STORY_PROJECTION;
 
-        if (args.containsKey("pid")) {
+        if (hasComment) {
             uri = Uri.withAppendedPath(uri, SlashdotProvider.COMMENTS_TABLE_NAME);
             uri = ContentUris.withAppendedId(uri, args.getLong("pid"));
+            projection = COMMENT_PROJECTION;
         }
 
-        Log.d(TAG, "Comment URI:" + uri);
+        Log.d(TAG, "Parent URI: " + uri);
 
-        return new CursorLoader(getActivity(), uri, COMMENT_PROJECTION, null, null, null);
+        return new CursorLoader(getActivity(), uri, projection, null, null, null);
     }
 
     @Override
@@ -152,12 +178,21 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
         if (cursor.moveToFirst()) {
             View view = getView();
 
-            TextView title = (TextView)view.findViewById(R.id.comment_title);
-            title.setText(Html.fromHtml(cursor.getString(1)) + " " + Html.fromHtml(cursor.getString(2)));
+            if (hasComment) {
+                TextView title = (TextView)view.findViewById(R.id.comment_title);
+                title.setText(Html.fromHtml(cursor.getString(1)) + " " + Html.fromHtml(cursor.getString(2)));
 
-            TextView content = (TextView)view.findViewById(R.id.comment_text);
-            content.setText(Html.fromHtml(cursor.getString(3)));
-            content.setMovementMethod(LinkMovementMethod.getInstance());
+                TextView content = (TextView)view.findViewById(R.id.comment_text);
+                content.setText(Html.fromHtml(cursor.getString(3)));
+                content.setMovementMethod(LinkMovementMethod.getInstance());
+            } else {
+                TextView title = (TextView) view.findViewById(R.id.story_title);
+                title.setText(Html.fromHtml(cursor.getString(0)));
+
+                TextView summary = (TextView) view.findViewById(R.id.story_summary);
+                summary.setText(Html.fromHtml(cursor.getString(1)));
+                summary.setMovementMethod(LinkMovementMethod.getInstance());
+            }
         }
     }
 
