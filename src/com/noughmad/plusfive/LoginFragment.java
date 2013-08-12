@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,17 +52,26 @@ public class LoginFragment extends DialogFragment {
     public void onStart()
     {
         super.onStart();
-        final AlertDialog d = (AlertDialog)getDialog();
+
+        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        if (prefs.contains("nickname") && prefs.contains("password")) {
+            refreshLogin(prefs.getString("nickname", ""), prefs.getString("password", ""));
+            ((AlertDialog)getDialog()).getButton(Dialog.BUTTON_POSITIVE).setEnabled(false);
+        }
+
+        AlertDialog d = (AlertDialog)getDialog();
         if(d != null)
         {
             Button positiveButton = (Button) d.getButton(Dialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(new View.OnClickListener()
             {
                 @Override
-                public void onClick(View v)
+                public void onClick(final View v)
                 {
                     final String nickname = ((EditText) mView.findViewById(R.id.editNickname)).getText().toString();
-                    String password = ((EditText) mView.findViewById(R.id.editPassword)).getText().toString();
+                    final String password = ((EditText) mView.findViewById(R.id.editPassword)).getText().toString();
+
+                    v.setEnabled(false);
 
                     AsyncTask<String, Void, Connection.Response> task = new AsyncTask<String, Void, Connection.Response>() {
 
@@ -83,9 +93,15 @@ public class LoginFragment extends DialogFragment {
                             if (response != null && response.hasCookie("user")) {
                                 getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
                                 Toast.makeText(getActivity(), getResources().getString(R.string.login_success, nickname), Toast.LENGTH_SHORT).show();
-                                d.dismiss();
+
+                                getActivity().getPreferences(Context.MODE_PRIVATE).edit()
+                                        .putString("nickname", nickname)
+                                        .putString("password", password).commit();
+
+                                getDialog().dismiss();
                             } else {
                                 Toast.makeText(getActivity(), R.string.login_failed, Toast.LENGTH_LONG).show();
+                                v.setEnabled(true);
                             }
                         }
                     };
@@ -94,5 +110,37 @@ public class LoginFragment extends DialogFragment {
                 }
             });
         }
+    }
+
+    void refreshLogin(String nickname, String password) {
+        AsyncTask<String, Void, Connection.Response> task = new AsyncTask<String, Void, Connection.Response>() {
+
+            @Override
+            protected Connection.Response doInBackground(String... params) {
+                Log.d("LoginTask", String.valueOf(params));
+                try {
+                    return Jsoup.connect("http://slashdot.org/my/login")
+                            .data("unickname", params[0])
+                            .data("upasswd", params[1])
+                            .method(Connection.Method.POST).execute();
+                } catch (IOException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Connection.Response response) {
+                if (response != null && response.hasCookie("user")) {
+                    getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
+                    Toast.makeText(getActivity(), getResources().getString(R.string.login_success, getActivity().getPreferences(Context.MODE_PRIVATE).getString("nickname", "")), Toast.LENGTH_SHORT).show();
+                    getDialog().dismiss();
+                } else {
+                    Toast.makeText(getActivity(), R.string.login_failed, Toast.LENGTH_LONG).show();
+                    ((AlertDialog)getDialog()).getButton(Dialog.BUTTON_POSITIVE).setEnabled(true);
+                }
+            }
+        };
+
+        task.execute(nickname, password);
     }
 }

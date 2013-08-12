@@ -69,14 +69,11 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
                     data.put("pid", Long.toString(getArguments().getLong("pid")));
                 }
 
-                try {
-                    data.put("postersubj", URLEncoder.encode(((EditText) view.findViewById(R.id.reply_subject)).getText().toString(), "UTF-8"));
-                    data.put("postercomment", URLEncoder.encode(((EditText)view.findViewById(R.id.reply_body)).getText().toString(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    data.put("postersubj", URLEncoder.encode(((EditText) view.findViewById(R.id.reply_subject)).getText().toString()));
-                    data.put("postercomment", URLEncoder.encode(((EditText)view.findViewById(R.id.reply_body)).getText().toString()));
+                data.put("postersubj", encode(((EditText) view.findViewById(R.id.reply_subject)).getText().toString()));
+                data.put("postercomment", encode(((EditText)view.findViewById(R.id.reply_body)).getText().toString()));
+                if (((CheckBox)view.findViewById(R.id.post_anon)).isChecked()) {
+                    data.put("postanon",  "1");
                 }
-                data.put("postanon", ((CheckBox)view.findViewById(R.id.post_anon)).isChecked() ? "1" : "0");
 
                 AsyncTask<Map<String, String>, Void, Boolean> task = new AsyncTask<Map<String, String>, Void, Boolean>() {
                     @Override
@@ -166,5 +163,19 @@ public class ReplyFragment extends Fragment implements LoaderManager.LoaderCallb
             content.setText(Html.fromHtml(cursor.getString(3)));
             content.setMovementMethod(LinkMovementMethod.getInstance());
         }
+    }
+
+    private String encode(String input) {
+        /*
+        String output;
+        try {
+            output = URLEncoder.encode(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            output = URLEncoder.encode(input);
+        }
+
+        return output.replace("+", "%20");
+        */
+        return input;
     }
 }
