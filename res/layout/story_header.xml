@@ -1,4 +1,5 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
@@ -23,25 +24,29 @@
         android:padding="16dp"
         android:linksClickable="true" />
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" >
+
     <TextView
             android:id="@+id/comment_score_limit"
             android:text="@string/comment_score_limit"
             android:textAppearance="?android:textAppearanceMedium"
-            android:padding="16dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/story_summary"
-            android:layout_alignParentLeft="true" />
+            android:layout_height="wrap_content" />
 
     <SeekBar
         android:id="@+id/comment_score_seek"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/story_summary"
+        android:layout_weight="1"
         android:max="6"
         android:progress="2"
-        android:padding="16dp"
-        android:layout_toRightOf="@+id/comment_score_limit"/>
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp" />
 
     <Button
             style="?android:attr/buttonStyleSmall"
@@ -49,9 +54,8 @@
             android:layout_height="wrap_content"
             android:text="@string/post"
             android:id="@+id/postButton"
-            android:layout_below="@+id/comment_score_limit"
-            android:minHeight="0dp"
-            android:layout_alignParentLeft="true"/>
+            android:minHeight="0dp" />
 
+    </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
