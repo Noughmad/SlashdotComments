@@ -232,10 +232,11 @@ public class SlashdotContent {
 
 		Document doc;
 		try {
-			doc = Jsoup.connect(source)
-                    .userAgent(USER_AGENT)
-                    .cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
-                    .get();
+            Connection connection = Jsoup.connect(source).userAgent(USER_AGENT);
+            if (context.getSharedPreferences("cookie", Context.MODE_PRIVATE).contains("user")) {
+                connection.cookie("user", context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""));
+            }
+            doc = connection.get();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;

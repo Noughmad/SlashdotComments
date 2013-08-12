@@ -1,10 +1,8 @@
 package com.noughmad.plusfive;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 

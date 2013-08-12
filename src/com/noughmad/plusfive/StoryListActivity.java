@@ -9,12 +9,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+
+import java.io.IOException;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -200,7 +206,6 @@ public class StoryListActivity extends Activity implements
 	}
 
     void logout() {
-        /*
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             protected Void doInBackground(Void... params) {
                 try {
@@ -211,18 +216,16 @@ public class StoryListActivity extends Activity implements
 
                 }
 
-                getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().remove("user").commit();
                 return null;
             }
 
             protected void onPostExecute(Void v) {
+                getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().remove("user").commit();
                 invalidateOptionsMenu();
+                Toast.makeText(StoryListActivity.this, R.string.logout_success, Toast.LENGTH_SHORT).show();
             }
         };
-        */
 
-        getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().remove("user").commit();
-        invalidateOptionsMenu();
-        Toast.makeText(this, R.string.logout_success, Toast.LENGTH_SHORT).show();
+
     }
 }
