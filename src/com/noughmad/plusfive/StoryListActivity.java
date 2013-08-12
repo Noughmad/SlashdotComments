@@ -1,9 +1,11 @@
 package com.noughmad.plusfive;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -50,6 +52,31 @@ public class StoryListActivity extends Activity implements
 			((StoryListFragment) getFragmentManager().findFragmentById(
 					R.id.story_list)).setActivateOnItemClick(true);
 		}
+
+        if (!getPreferences(Context.MODE_PRIVATE).contains("welcome-login-dialog")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setTitle(R.string.app_name);
+            builder.setMessage(R.string.welcome_message);
+
+            builder.setPositiveButton(R.string.login, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    DialogFragment newFragment = new LoginFragment();
+                    newFragment.show(getFragmentManager(), "login");
+                }
+            });
+
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            builder.create().show();
+            getPreferences(MODE_PRIVATE).edit().putBoolean("welcome-login-dialog", true).commit();
+        }
 		
 		Log.w("BASE_URI", SlashdotProvider.BASE_URI.toString());
 

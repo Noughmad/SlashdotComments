@@ -131,9 +131,13 @@ public class LoginFragment extends DialogFragment {
             @Override
             protected void onPostExecute(Connection.Response response) {
                 if (response != null && response.hasCookie("user")) {
-                    getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
-                    Toast.makeText(getActivity(), getResources().getString(R.string.login_success, getActivity().getPreferences(Context.MODE_PRIVATE).getString("nickname", "")), Toast.LENGTH_SHORT).show();
-                    getDialog().dismiss();
+                    try {
+                        getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
+                        Toast.makeText(getActivity(), getResources().getString(R.string.login_success, getActivity().getPreferences(Context.MODE_PRIVATE).getString("nickname", "")), Toast.LENGTH_SHORT).show();
+                        getDialog().dismiss();
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Toast.makeText(getActivity(), R.string.login_failed, Toast.LENGTH_LONG).show();
                     ((AlertDialog)getDialog()).getButton(Dialog.BUTTON_POSITIVE).setEnabled(true);
@@ -148,9 +152,8 @@ public class LoginFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-        ReplyActivity reply = (ReplyActivity)getActivity();
-        if (reply != null) {
-            reply.onLoggedIn();
+        if (getActivity() instanceof ReplyActivity) {
+            ((ReplyActivity)getActivity()).onLoggedIn();
         }
     }
 }
