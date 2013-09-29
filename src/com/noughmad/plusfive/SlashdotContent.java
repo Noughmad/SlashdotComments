@@ -91,7 +91,11 @@ public class SlashdotContent {
 			values.put(SlashdotProvider.STORY_SUMMARY, article.select("div#text-" + id).first().html());
 			values.put(SlashdotProvider.STORY_COMMENT_COUNT, Integer.parseInt(article.select("span.commentcnt-" + id).first().html()));
 			
-			String date = article.select("time").html().substring(3);
+			String date = article.select("time").html();
+            if (date.startsWith("on") || date.startsWith("On")) {
+                date = date.substring(3);
+            }
+
             int timeIndex = 0;
             if (date.contains("@")) {
     			timeIndex = date.indexOf('@');
@@ -159,7 +163,12 @@ public class SlashdotContent {
 
             values.put(SlashdotProvider.ID, id);
 
-            title = tree.select("a#comment_link_" + id).first().html();
+            Element title_el = tree.select("a#comment_link_" + id).first();
+            if (title_el == null) {
+                title_el = tree.select("a[name=" + id + "]").first();
+            }
+
+            title = title_el.html();
             if (title.trim().equals("Re:") && parentTitle != null) {
                 if (parentTitle.startsWith("Re:")) {
                     title = parentTitle;

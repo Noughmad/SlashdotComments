@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
@@ -21,6 +22,8 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 
 /**
  * An activity representing a list of Stories. This activity has different
@@ -38,7 +41,8 @@ import java.io.IOException;
  * {@link StoryListFragment.Callbacks} interface to listen for item selections.
  */
 public class StoryListActivity extends Activity implements
-		StoryListFragment.Callbacks {
+		StoryListFragment.Callbacks,
+        PullToRefreshAttacher.OnRefreshListener {
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -46,6 +50,13 @@ public class StoryListActivity extends Activity implements
 	 */
 	private boolean mRefreshing;
 	private ShareActionProvider mShareProvider;
+    private PullToRefreshAttacher mPullToRefreshAttacher;
+
+    private static final String TAG = "StoryListActivity";
+
+    PullToRefreshAttacher getPullToRefreshAttacher() {
+        return mPullToRefreshAttacher;
+    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +69,8 @@ public class StoryListActivity extends Activity implements
 			((StoryListFragment) getFragmentManager().findFragmentById(
 					R.id.story_list)).setActivateOnItemClick(true);
 		}
+
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         if (!getPreferences(Context.MODE_PRIVATE).contains("welcome-login-dialog")) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -202,6 +215,10 @@ public class StoryListActivity extends Activity implements
 		if (refreshing != mRefreshing) {
 			mRefreshing = refreshing;
 			invalidateOptionsMenu();
+
+            if (refreshing == false) {
+                mPullToRefreshAttacher.setRefreshComplete();
+            }
 		}
 	}
 
@@ -225,7 +242,12 @@ public class StoryListActivity extends Activity implements
                 Toast.makeText(StoryListActivity.this, R.string.logout_success, Toast.LENGTH_SHORT).show();
             }
         };
+    }
 
-
+    @Override
+    public void onRefreshStarted(View view) {
+        Log.i(TAG, "Refresh by pull started");
+        StoryListFragment fragment = (StoryListFragment) getFragmentManager().findFragmentById(R.id.story_list);
+        fragment.refreshStories();
     }
 }

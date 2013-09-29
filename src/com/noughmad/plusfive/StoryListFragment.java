@@ -238,8 +238,6 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
 					calendar.add(Calendar.DAY_OF_MONTH, -1);
 					
 					(new GetStoriesTask()).execute(calendar);
-				} else if (firstVisibleItem == 0) {
-					(new GetStoriesTask()).execute(Calendar.getInstance());
 				}
 				
 				mLastScrollPosition = firstVisibleItem;
@@ -257,6 +255,9 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
         AdRequest request = new AdRequest();
         request.addTestDevice(AdRequest.TEST_EMULATOR);
         ad.loadAd(request);
+
+        StoryListActivity listActivity = (StoryListActivity) getActivity();
+        listActivity.getPullToRefreshAttacher().addRefreshableView(getListView(), listActivity);
 	}
 
 	@Override
