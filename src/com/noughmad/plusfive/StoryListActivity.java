@@ -40,9 +40,8 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
  * This activity also implements the required
  * {@link StoryListFragment.Callbacks} interface to listen for item selections.
  */
-public class StoryListActivity extends Activity implements
-		StoryListFragment.Callbacks,
-        PullToRefreshAttacher.OnRefreshListener {
+public class StoryListActivity extends RefreshActivity implements
+		StoryListFragment.Callbacks {
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -50,13 +49,8 @@ public class StoryListActivity extends Activity implements
 	 */
 	private boolean mRefreshing;
 	private ShareActionProvider mShareProvider;
-    private PullToRefreshAttacher mPullToRefreshAttacher;
 
     private static final String TAG = "StoryListActivity";
-
-    PullToRefreshAttacher getPullToRefreshAttacher() {
-        return mPullToRefreshAttacher;
-    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +63,6 @@ public class StoryListActivity extends Activity implements
 			((StoryListFragment) getFragmentManager().findFragmentById(
 					R.id.story_list)).setActivateOnItemClick(true);
 		}
-
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
         if (!getPreferences(Context.MODE_PRIVATE).contains("welcome-login-dialog")) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -162,10 +154,6 @@ public class StoryListActivity extends Activity implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.refresh_stories:
-			StoryListFragment fragment = (StoryListFragment) getFragmentManager().findFragmentById(R.id.story_list);
-			fragment.refreshStories();
-			return true;
 			
 		case R.id.open_in_browser:
 			Uri storiesUri = Uri.withAppendedPath(SlashdotProvider.BASE_URI, SlashdotProvider.STORIES_TABLE_NAME);
@@ -188,9 +176,10 @@ public class StoryListActivity extends Activity implements
         case R.id.logout:
             logout();
             return true;
-        }
 
-		return false;
+        default:
+            return false;
+        }
 	}
 	
 	@Override
@@ -217,7 +206,7 @@ public class StoryListActivity extends Activity implements
 			invalidateOptionsMenu();
 
             if (refreshing == false) {
-                mPullToRefreshAttacher.setRefreshComplete();
+                getAttacher().setRefreshComplete();
             }
 		}
 	}

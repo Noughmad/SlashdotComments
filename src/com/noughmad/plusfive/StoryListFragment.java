@@ -256,8 +256,8 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
         request.addTestDevice(AdRequest.TEST_EMULATOR);
         ad.loadAd(request);
 
-        StoryListActivity listActivity = (StoryListActivity) getActivity();
-        listActivity.getPullToRefreshAttacher().addRefreshableView(getListView(), listActivity);
+        RefreshActivity refreshActivity = (RefreshActivity) getActivity();
+        refreshActivity.getAttacher().addRefreshableView(getListView(), refreshActivity);
 	}
 
 	@Override
