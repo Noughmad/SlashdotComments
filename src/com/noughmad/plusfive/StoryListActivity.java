@@ -212,6 +212,7 @@ public class StoryListActivity extends RefreshActivity implements
 	}
 
     void logout() {
+        Log.d(TAG, "Log out called");
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             protected Void doInBackground(Void... params) {
                 try {
@@ -219,7 +220,7 @@ public class StoryListActivity extends RefreshActivity implements
                         .cookie("user", getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("user", ""))
                         .method(Connection.Method.GET).execute();
                 } catch (IOException e) {
-
+                    e.printStackTrace();
                 }
 
                 return null;
@@ -231,6 +232,8 @@ public class StoryListActivity extends RefreshActivity implements
                 Toast.makeText(StoryListActivity.this, R.string.logout_success, Toast.LENGTH_SHORT).show();
             }
         };
+
+        task.execute();
     }
 
     @Override

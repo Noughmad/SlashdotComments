@@ -92,6 +92,7 @@ public class LoginFragment extends DialogFragment {
                         protected void onPostExecute(Connection.Response response) {
                             if (response != null && response.hasCookie("user")) {
                                 getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
+                                getActivity().invalidateOptionsMenu();
                                 Toast.makeText(getActivity(), getResources().getString(R.string.login_success, nickname), Toast.LENGTH_SHORT).show();
 
                                 getActivity().getPreferences(Context.MODE_PRIVATE).edit()
