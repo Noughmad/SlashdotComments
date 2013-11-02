@@ -22,10 +22,6 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
-
 import java.util.Calendar;
 
 /**
@@ -202,8 +198,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
             getListView().addFooterView(quote);
         }
 
+        /*
         AdView ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
         getListView().addFooterView(ad);
+
+        */
 
 		setListAdapter(new StoriesAdapter(getActivity(), null));
 		refreshStories();
