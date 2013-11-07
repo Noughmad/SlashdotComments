@@ -251,9 +251,11 @@ public class StoryListFragment extends ListFragment implements LoaderManager.Loa
             getLoaderManager().initLoader(1, null, this);
         }
 
+        /*
         AdRequest request = new AdRequest();
         request.addTestDevice(AdRequest.TEST_EMULATOR);
         ad.loadAd(request);
+        */
 
         RefreshActivity refreshActivity = (RefreshActivity) getActivity();
         refreshActivity.getAttacher().addRefreshableView(getListView(), refreshActivity);

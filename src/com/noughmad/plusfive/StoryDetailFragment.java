@@ -18,7 +18,9 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.CursorAdapter;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -156,11 +158,8 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
         mQuoteTextView = (TextView)quote.findViewById(R.id.quote_text);
         getListView().addFooterView(quote);
 
-        /*
-        TapForTap ad = new AdView(getActivity(), AdSize.BANNER, "a151f3af95c37cd");
+        View ad = getActivity().getLayoutInflater().inflate(R.layout.banner, null, false);
         getListView().addFooterView(ad);
-
-        */
 
         mHeader = getActivity().getLayoutInflater().inflate(R.layout.story_header, getListView(), false);
         final TextView summary = (TextView) mHeader.findViewById(R.id.story_summary);
@@ -224,12 +223,6 @@ public class StoryDetailFragment extends ListFragment implements LoaderManager.L
         getLoaderManager().initLoader(0, args, this);
         getLoaderManager().initLoader(2, null, this);
         getLoaderManager().initLoader(1, null, this);
-
-        /*
-        AdRequest request = new AdRequest();
-        request.addTestDevice(AdRequest.TEST_EMULATOR);
-        ad.loadAd(request);
-        */
 	}
 
 

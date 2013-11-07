@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.tapfortap.TapForTap;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
@@ -134,8 +136,10 @@ public class LoginFragment extends DialogFragment {
                 if (response != null && response.hasCookie("user")) {
                     try {
                         getActivity().getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("user", response.cookie("user")).commit();
-                        Toast.makeText(getActivity(), getResources().getString(R.string.login_success, getActivity().getPreferences(Context.MODE_PRIVATE).getString("nickname", "")), Toast.LENGTH_SHORT).show();
+                        String username = getActivity().getPreferences(Context.MODE_PRIVATE).getString("nickname", "");
+                        Toast.makeText(getActivity(), getResources().getString(R.string.login_success, username), Toast.LENGTH_SHORT).show();
                         getDialog().dismiss();
+                        TapForTap.setUserAccountId(username);
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }

@@ -18,6 +18,8 @@ import android.view.View;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
+import com.tapfortap.TapForTap;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
@@ -56,6 +58,8 @@ public class StoryListActivity extends RefreshActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_story_list);
+
+        TapForTap.initialize(getApplicationContext(), "664a57b6f74bac48b3700d7cd1310139");
 
 		if (isTwoPane()) {
 			// In two-pane mode, list items should be given the

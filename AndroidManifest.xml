@@ -4,10 +4,22 @@
     android:versionCode="13"
     android:versionName="3.1.0" >
 
+
+    <meta-data
+        android:name="com.tapfortap.API_KEY"
+        android:value="664a57b6f74bac48b3700d7cd1310139" />
+    <meta-data
+        android:name="com.tapfortap.TEST_MODE"
+        android:value="true"/>
+
+
+
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="18" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -21,7 +33,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -37,12 +48,11 @@
                 android:name="com.noughmad.plusfive.ReplyActivity"
                 android:label="@string/post_comment" >
         </activity>
-        <activity android:name="com.google.ads.AdActivity"
-                  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <provider
             android:name="com.noughmad.plusfive.SlashdotProvider"
             android:authorities="com.noughmad.plusfive.provider" >
         </provider>
+        <activity android:name="com.tapfortap.FullScreenAdActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
     </application>
 
 </manifest>

@@ -261,10 +261,10 @@ public class SlashdotContent {
         ContentValues values = new ContentValues();
         values.put(SlashdotProvider.STORY_SID, sid);
         context.getContentResolver().update(storyUri, values, null, null);
-		
+
 		Uri baseUri = Uri.withAppendedPath(storyUri, SlashdotProvider.COMMENTS_TABLE_NAME);
-		context.getContentResolver().delete(baseUri, null, null);
-		
+        // context.getContentResolver().delete(baseUri, null, null);
+
 		for (Element tree : doc.select("ul#commentlisting > li.comment")) {
 			parseComment(context, baseUri, tree, 0, null);			
 		}
