@@ -186,9 +186,13 @@ public class SlashdotContent {
                 author = comment.select("span.by").first().html();
             }
 
-            values.put(SlashdotProvider.COMMENT_AUTHOR, author);
-
-            values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
+            try {
+                values.put(SlashdotProvider.COMMENT_AUTHOR, author);
+                values.put(SlashdotProvider.COMMENT_CONTENT, comment.select("div#comment_body_" + id).first().html());
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                return;
+            }
 
             String scoreHtml = comment.select("span.score").first().html();
             values.put(SlashdotProvider.COMMENT_SCORE_TEXT, scoreHtml);
